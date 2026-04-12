@@ -110,8 +110,8 @@
 |---------|------|-----------------|
 | 01_knowledge_inventory.md | 34件の知識群の棚卸し | 知識基盤に何があるかの全体像 |
 | 02_knowledge_layers.md | 4層の知識層定義と振り分け | 検索・参照先の判断基準 |
-| 03_search_requirements.md | 6種の検索パターン | エージェントの知識検索ロジックの設計入力 |
-| 04_knowledge_utilization_flow.md | 7ステップの知識活用フロー | エージェントの判断フローの設計入力 |
+| 03_search_requirements.md | 7種の検索パターン（SR-01〜SR-07、要件Q1〜Q7対応） | エージェントの知識検索ロジックの設計入力 |
+| 04_knowledge_utilization_flow.md | 6ステップの知識活用フロー（F1〜F6） | エージェントの判断フローの設計入力 |
 | 05_rag_scope.md | RAG向き/非向き資産の切り分け | RAG実装の設計入力 |
 | 06_recheck_rules_and_trust.md | 再確認ルールと4段階の信頼区分 | 鮮度管理の運用ルール |
 | 07_knowledge_schema.md | 知識項目スキーマ（必須17項目+補助6項目） | 知識DB/知識ファイルの構造定義 |
