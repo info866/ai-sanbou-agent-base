@@ -3,8 +3,12 @@
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "type": "command",
-        "command": "bash .claude/hooks/protect-canonical.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/protect-canonical.sh"
+          }
+        ]
       }
     ]
   },
