@@ -22,7 +22,10 @@ tools:
 
 ## 実行手順
 
-1. `phase2_decision_foundation/00_scope_and_execution_contract.md` を Read で読み、当該グループの完了条件・停止線を把握する
+1. 対象フェーズの作業契約書を Read で読み、完了条件・停止線を把握する
+   - フェーズ1: `phase1_information_foundation/00_scope_and_execution_contract.md`
+   - フェーズ2: `phase2_decision_foundation/00_scope_and_execution_contract.md`
+   - フェーズ3: `phase3_knowledge_foundation/00_scope_and_execution_contract.md`
 2. 呼び出し元から渡された git情報 と 作業概要 を基に報告を構成する
 3. 必要に応じて成果物ファイルを Read / Glob で確認し、要点を把握する
 

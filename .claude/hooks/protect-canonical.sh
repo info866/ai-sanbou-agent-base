@@ -31,6 +31,8 @@ protected_patterns=(
     "フェーズ1作業指示書"
     "フェーズ２ 要件定義書"
     "フェーズ２作業指示書"
+    "フェーズ3 要件定義書"
+    "フェーズ3作業指示書"
 )
 
 for pattern in "${protected_patterns[@]}"; do

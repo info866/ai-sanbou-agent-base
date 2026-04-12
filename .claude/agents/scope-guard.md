@@ -19,26 +19,38 @@ tools:
 ## 監査手順
 
 ### 1. 作業契約の確認
-`phase2_decision_foundation/00_scope_and_execution_contract.md` を Read で読み、以下を把握する:
-- フェーズ2で今回やること
-- フェーズ2で今回まだやらないこと（絶対禁止）
+現在のフェーズの作業契約書を Read で読み、以下を把握する:
+- フェーズ1: `phase1_information_foundation/00_scope_and_execution_contract.md`
+- フェーズ2: `phase2_decision_foundation/00_scope_and_execution_contract.md`
+- フェーズ3: `phase3_knowledge_foundation/00_scope_and_execution_contract.md`
+
+呼び出し元から現在のフェーズが指定されない場合は、最も番号の大きいフェーズの契約書を使う。
+
+把握する項目:
+- 今回やること
+- 今回まだやらないこと（絶対禁止）
 - 完了条件
 - 絶対ルール
 
 ### 2. 成果物ファイルの一覧確認
-`phase2_decision_foundation/` 配下のファイルを Glob で一覧し、想定外のファイルがないか確認する。
+現在のフェーズの成果物ディレクトリを Glob で一覧し、想定外のファイルがないか確認する。
+- フェーズ1: `phase1_information_foundation/`
+- フェーズ2: `phase2_decision_foundation/`
+- フェーズ3: `phase3_knowledge_foundation/`
 
 ### 3. 正本文書の存在確認（補助検査）
 正本文書の直接保護は PreToolUse hook（.claude/hooks/protect-canonical.sh）が担う。
 ここでは補助的に、正本ファイルが存在しているかを Read で確認する。
 
-以下の6ファイルを Read で読み込み、存在を確認する:
+以下の正本ファイルを Read で読み込み、存在を確認する:
 - `Read("1.大分類要件提起書.md")`
 - `Read("2.大分類作業指示書.md")`
 - `Read("3.フェーズ1 要件定義書.md")`
 - `Read("4.フェーズ1作業指示書.md")`
 - `Read("５.フェーズ２ 要件定義書.md")`
 - `Read("６.フェーズ２作業指示書.md")`
+- `Read("7.フェーズ3 要件定義書.md")`
+- `Read("8.フェーズ3作業指示書.md")`
 
 Read が成功すれば存在確認とする。失敗（ファイルが見つからない）場合は「正本文書が見つかりません」と警告する。
 ただしこの検査は補助的なものであり、**hookによるブロックが主防御ライン**である。
