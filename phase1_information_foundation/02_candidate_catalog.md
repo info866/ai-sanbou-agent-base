@@ -418,7 +418,7 @@
 - **current_status**: 比較待ち
 - **first_seen_at**: 2026-04-12
 - **last_checked_at**: 2026-04-12
-- **notes**: 8,242 stars。MCP-native agent framework。比較対象: langgraph（F-023）, crewAI（F-024）, autogen（F-025）、Claude Agent SDK（F-009）。
+- **notes**: 8,242 stars。MCP-native agent framework。比較対象: langgraph（F-027）, crewAI（F-028）, autogen（F-029）、Claude Agent SDK（F-009）。
 
 ---
 

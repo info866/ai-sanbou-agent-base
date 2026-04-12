@@ -1,7 +1,7 @@
 # 未探索領域・フェーズ2引き継ぎ（Unexplored Areas & Phase2 Handoff）
 
 > **担当**: グループ2（パート1記入）→ グループ3（パート2・3を完成させる）  
-> **最終更新**: 2026-04-12（グループ2）
+> **最終更新**: 2026-04-12（グループ3）
 
 ---
 
@@ -125,9 +125,9 @@
 | # | 比較ペア / グループ | 候補item_id | 比較軸 |
 |---|-------------------|-------------|--------|
 | CP-01 | router・gateway選択 | F-020（claude-code-router）vs F-022（litellm） | Claude特化 vs マルチプロバイダー対応・運用コスト・機能カバレッジ |
-| CP-02 | orchestration主軸選択 | F-021（LangGraph）vs F-027（CrewAI）vs F-028（AutoGen） | 設計柔軟性 vs ロールベース手軽さ vs 会話駆動精度。Claude Agent SDKとの統合難易度も評価軸 |
-| CP-03 | 実行エージェント管理層 | F-003（Subagents）vs F-012（Managed Agents） | 自己ホスト制御性 vs マネージドの運用コスト削減。betaのGA移行後に本格評価 |
-| CP-04 | MCPワークフロー層 | F-024（mcp-agent）vs F-021（LangGraph） | MCPファースト設計 vs グラフ制御の豊富さ |
+| CP-02 | orchestration主軸選択 | F-027（LangGraph）vs F-028（CrewAI）vs F-029（AutoGen） | 設計柔軟性 vs ロールベース手軽さ vs 会話駆動精度。Claude Agent SDKとの統合難易度も評価軸 |
+| CP-03 | 実行エージェント管理層 | F-003（Subagents）vs F-006（Claude Managed Agents） | 自己ホスト制御性 vs マネージドの運用コスト削減。betaのGA移行後に本格評価 |
+| CP-04 | MCPワークフロー層 | F-021（mcp-agent）vs F-027（LangGraph） | MCPファースト設計 vs グラフ制御の豊富さ |
 | CP-05 | evaluation・observability基盤 | D-003（Langfuse）vs D-004（Braintrust）vs D-005（W&B Weave） | OSS vs SaaS・コスト・Claude Agent SDKとの統合容易性 |
 
 ---
@@ -152,7 +152,7 @@
 
 | # | 対象領域 | 流用候補 | 自作の根拠 | 判断に必要な情報 |
 |---|---------|---------|-----------|---------------|
-| BV-01 | エージェントオーケストレーション層 | LangGraph（F-021）/ mcp-agent（F-024） | Claude Agent SDK単体でも制御フローは実装可能。不要な依存を増やしたくない場合 | Claude Agent SDK Docsのworkflow制御機能の詳細確認（A-013）・LangGraph×SDK統合の実績確認 |
+| BV-01 | エージェントオーケストレーション層 | LangGraph（F-027）/ mcp-agent（F-021） | Claude Agent SDK単体でも制御フローは実装可能。不要な依存を増やしたくない場合 | Claude Agent SDK Docsのworkflow制御機能の詳細確認（A-013）・LangGraph×SDK統合の実績確認 |
 | BV-02 | エージェント評価・モニタリング | Langfuse / Braintrust / W&B Weave（D-003〜D-005） | Agent SDKのhooks機能を使えばカスタムトレーシングも実装可能 | 各評価OSSのClaude Agent SDK対応状況・hooks経由の独自実装コスト比較 |
 | BV-03 | Skills実装 | anthropics/skills（F-013）から既存スキル流用 | プロジェクト固有のワークフローはゼロから設計する方が適合度が高い | anthropics/skillsのスキル一覧と品質確認（B-001）・プロジェクト要件との適合度評価 |
 
@@ -164,10 +164,10 @@
 
 | # | 候補 | item_id | 推奨理由 | 試験導入の形態 |
 |---|------|---------|---------|--------------|
-| TI-01 | Claude Code Hooks | F-002 | 既にGA機能・設定方法確認済み。本プロジェクトのPreToolUse制御に即座に活用できる | `.claude/settings.json`への簡単なhooks設定から開始 |
+| TI-01 | Claude Code Hooks | F-004 | 既にGA機能・設定方法確認済み。本プロジェクトのPreToolUse制御に即座に活用できる | `.claude/settings.json`への簡単なhooks設定から開始 |
 | TI-02 | Claude Code Subagents | F-003 | GAで最も成熟している自律エージェント機能。YAML定義から学習開始できる | 単一タスク専門のサブエージェントを1つ定義してみる |
-| TI-03 | Claude Agent SDK (Python) | F-010 | Anthropic公式SDK。フェーズ3の実装基盤として早期に慣れておく価値がある | claude-agent-sdk-demosのemail assistantから動作確認 |
-| TI-04 | MCP（接続層） | F-015 | MCPは接続層の標準。mcpサーバーを1つ動作させるだけで接続層の実感が得られる | Playwright MCP（D-002）を試験接続 |
+| TI-03 | Claude Agent SDK (Python) | F-015 | Anthropic公式SDK Python実装。フェーズ3の実装基盤として早期に慣れておく価値がある | claude-agent-sdk-demos（F-017）のemail assistantから動作確認 |
+| TI-04 | MCP（接続層） | F-002 | MCPは接続層の標準。mcpサーバーを1つ動作させるだけで接続層の実感が得られる | Playwright MCP（D-002）を試験接続 |
 
 ---
 
@@ -191,12 +191,12 @@
 
 | item_id | 候補名 | 保留理由 | 解消条件 | 再評価優先度 |
 |---------|--------|---------|---------|------------|
-| F-012 | Claude Managed Agents | 2026-04-08公開betaでありAPI詳細・pricing・制限が未確定。安定性の確認が必要 | GA移行、またはbeta利用で十分な情報が得られた時点 | 高（GA後即評価） |
+| F-006 | Claude Managed Agents | 2026-04-08公開betaでありAPI詳細・pricing・制限が未確定。安定性の確認が必要 | GA移行、またはbeta利用で十分な情報が得られた時点 | 高（GA後即評価） |
 | F-008 | Agent Teams | experimentalフラグが外れていない。本番利用に不安定要素がある | experimental→betaまたはGAへの昇格 | 中（昇格後評価） |
-| F-004 | Advisor Tool | 2026-04-09公開betaでpricingが未公表。長期エージェントタスクのコスト試算ができない | pricing公表・GA移行 | 中（pricing公表後評価） |
+| F-012 | Advisor Tool | 2026-04-09公開betaでpricingが未公表。長期エージェントタスクのコスト試算ができない | pricing公表・GA移行 | 中（pricing公表後評価） |
 | F-023 | lastmile-ai/mcp-eval | 20 starsと活動量が極めて低い。MCPサーバー評価ツールとしての実用性が疑わしい | スター数の増加・コントリビューター増加・アクティブメンテナンスの再開 | 低（状況変化があれば） |
 | F-030 | openai/openai-agents-python | 比較参照目的のみ。Claude非ネイティブで採用候補とはならない | — | 不要（比較時参照のみ） |
-| E-003 | ant CLI | 2026-04-08リリースだがドキュメントURLが未確認。機能範囲が不明 | ドキュメント発見・機能範囲確認 | 中（ドキュメント発見後） |
+| F-024 | ant CLI（docs未確定: E-003）| 2026-04-08リリースだがドキュメントURLが未確認。機能範囲が不明 | ドキュメント発見・機能範囲確認 | 中（ドキュメント発見後） |
 
 ---
 
@@ -207,9 +207,9 @@
 | 優先順位 | 論点 | 理由 | 関連item_id |
 |---------|------|------|-------------|
 | 1 | Evaluation / Observability基盤の選定 | 評価基盤なしには他の採用判断の品質を担保できない。フェーズ2で最初に確立すべき | D-003, D-004, D-005 |
-| 2 | Claude Managed Agents詳細仕様の確認 | betaが解禁されている最新機能。実行基盤の主軸になりうるため、詳細確認が比較評価の前提 | F-012, A-009 |
-| 3 | LangGraph × Claude Agent SDK 統合方法の実証 | orchestration候補の最有力。実際に組み合わせて動くかを早期に確認することで後続設計の不確実性を除去 | F-021, F-010 |
-| 4 | claude-agent-sdk-demos実装内容の精査 | 公式参照実装。フェーズ3の実装方針確定前に参照実装を把握しておく必要がある | B-005, F-025 |
+| 2 | Claude Managed Agents詳細仕様の確認 | betaが解禁されている最新機能。実行基盤の主軸になりうるため、詳細確認が比較評価の前提 | F-006, A-009 |
+| 3 | LangGraph × Claude Agent SDK 統合方法の実証 | orchestration候補の最有力。実際に組み合わせて動くかを早期に確認することで後続設計の不確実性を除去 | F-027, F-009 |
+| 4 | claude-agent-sdk-demos実装内容の精査 | 公式参照実装。フェーズ3の実装方針確定前に参照実装を把握しておく必要がある | F-017 |
 | 5 | Skills vs Subagents 役割分担の明確化（UQ-02） | 実装設計の根幹となる設計判断。曖昧なまま進むと後の混乱につながる | F-005, F-003, UQ-02 |
 
 ---
