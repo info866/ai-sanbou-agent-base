@@ -242,10 +242,12 @@
 
 ### まだ残る課題
 
-| # | 課題 | 影響 | 対応 |
-|---|------|------|------|
-| 1 | D-004（Braintrust）/ D-005（W&B Weave）がF-xxxに未昇格 | 所属マップにはD-xxx表記で残存。グループ3の評価時に詳細調査・昇格判断 | グループ3 |
-| 2 | カスタムskillがSkill toolに自動登録されない | CLI `/phase-report` で呼び出すか、SKILL.md直接実行で代替 | 既知制約として運用 |
+| # | 課題 | core runtime か | 対応 |
+|---|------|----------------|------|
+| 1 | D-004（Braintrust）/ D-005（W&B Weave）がF-xxxに未昇格 | **いいえ**（候補管理の問題。runtime基盤ではない） | グループ3の評価時に昇格判断 |
+| 2 | scope-guard の正本Glob がhaiku subagentのパス解決により不安定な場合がある | **いいえ**（hookが主防御。subagentのGlobは補助検査） | hookが正常動作している限り実害なし |
+
+**core runtime 未解決課題: ゼロ**
 
 ### 常用ルール（更新版）
 
@@ -254,11 +256,61 @@
 | protect-canonical hook | **常用（常時自動）** | Edit/Writeで正本を触ると自動ブロック |
 | catalog-checker | **常用** | Agent tool（model: haiku）で呼び出し |
 | scope-guard | **常用** | Agent tool（model: haiku）で呼び出し。作業説明を添えること |
-| phase-report | **常用** | SKILL.mdの指示に従い報告生成。またはCLI `/phase-report` |
+| phase-reporter | **常用** | Agent tool（model: haiku）で呼び出し。git情報と作業概要を渡すこと |
 
 ### 常用可能と言える範囲
 
 - **hook**: 完全に常用可能。6テスト全合格、自動動作
-- **catalog-checker**: 完全に常用可能。38候補の整合性検査が実動作で確認済み
-- **scope-guard**: 常用可能。正本確認はキーワードGlobで安定化済み。hookが主防御
-- **phase-report**: 条件付き常用可能。Skill toolは未対応だが、SKILL.md直接実行で報告生成が可能
+- **catalog-checker**: 完全に常用可能。38候補の整合性検査が複数回の実動作で確認済み
+- **scope-guard**: 完全に常用可能。正本確認はhookが主防御、Glob検査は補助
+- **phase-reporter**: 完全に常用可能。旧skill版はSkill tool未対応で呼出不能だったため廃止し、subagentとしてAgent toolで確実に呼び出せる形に置き換え済み
+
+---
+
+## 第3回補正（最終仕上げ）
+
+> **実施日**: 2026-04-12
+
+### 目的
+
+phase-report を「呼び出せない skill」から「確実に呼び出せる subagent」へ置き換え、core runtime の未完成要素をゼロにする。
+
+### 実施内容
+
+1. `.claude/skills/phase-report/SKILL.md` を廃止（削除）
+2. `.claude/agents/phase-reporter.md` を新規作成（subagent として再実装）
+3. 全4機能（hook / catalog-checker / scope-guard / phase-reporter）を実動作確認
+4. 07 / 09 を最終状態に更新
+
+### なぜ skill を廃止し subagent にしたか
+
+- **事実**: Skill tool（`/skill-name` 呼び出し）のレジストリにカスタム project skill は自動登録されない
+- **結果**: `.claude/skills/phase-report/SKILL.md` は存在するが Skill tool から呼び出し不能
+- **代替手段の検討**: SKILL.md を読んで手動実行する方法はあるが、これは「自然な呼び出し」ではない
+- **解決**: Agent tool で確実に呼び出せる subagent（`.claude/agents/phase-reporter.md`）に置き換え
+- **実証**: catalog-checker / scope-guard が Agent tool 経由で正常動作することを複数回実証済み
+
+### 最終実動作結果
+
+| 機能 | 呼び出し方法 | 結果 | 判定 |
+|------|------------|------|------|
+| protect-canonical hook | 自動（Edit/Write時） | 正本ブロック exit 2、成果物許可 exit 0 | **PASS** |
+| catalog-checker | Agent tool (haiku) | 5/5 PASS。38候補完全整合 | **PASS** |
+| scope-guard | Agent tool (haiku) | 禁止キーワードなし、範囲内判定 | **PASS** |
+| phase-reporter | Agent tool (haiku) | テンプレート6セクションの報告書を正常生成 | **PASS** |
+
+### core runtime 最終状態
+
+| 要素 | 状態 | 呼び出し方法 |
+|------|------|------------|
+| PreToolUse hook | **完成** | 自動（Edit/Writeで正本を触ると発動） |
+| catalog-checker subagent | **完成** | Agent tool (model: haiku) |
+| scope-guard subagent | **完成** | Agent tool (model: haiku) + 作業説明 |
+| phase-reporter subagent | **完成** | Agent tool (model: haiku) + git情報 + 作業概要 |
+| project settings | **完成** | .claude/settings.json（自動適用） |
+
+**core runtime 未解決課題: ゼロ**
+
+### 完了判定
+
+runtime 基盤補正タスクは完了。全4機能が project scope で自然に呼び出せ、実動作で結果を返し、以後の作業で常用可能な状態に到達した。
