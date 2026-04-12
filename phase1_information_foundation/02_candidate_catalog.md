@@ -113,7 +113,7 @@
 - **item_id**: F-005
 - **item_name**: Skills / Agent Skills
 - **item_type**: 公式機能（オープン標準）
-- **layer_category**: 要グループ3確定
+- **layer_category**: 実行層
 - **vendor_owner**: Anthropic（オープン標準）
 - **source_url**: https://code.claude.com/docs/en/skills
 - **summary**: SKILL.mdファイルで定義するClaude Code拡張機能。チームのノウハウ・ワークフローをパッケージ化して/skill-nameで呼び出せる再利用可能なモジュール。agentskills.ioのオープン標準に準拠。
@@ -261,7 +261,7 @@
 - **item_id**: F-013
 - **item_name**: anthropics/skills（Skillsマーケットプレイス）
 - **item_type**: 公式実装
-- **layer_category**: 要グループ3確定
+- **layer_category**: 実行層
 - **vendor_owner**: Anthropic
 - **source_url**: https://github.com/anthropics/skills
 - **summary**: Agent Skillsの公式リポジトリ。115k starsを持つ最大規模の公式実装。スキルマーケットプレイスとして機能。
@@ -603,7 +603,7 @@
 - **item_id**: F-031
 - **item_name**: Agent Skills Open Standard
 - **item_type**: OSS（仕様・標準）
-- **layer_category**: 要グループ3確定
+- **layer_category**: 実行層
 - **vendor_owner**: Anthropic（オープン標準として公開）
 - **source_url**: https://agentskills.io/home
 - **summary**: Anthropicが2025-12-18に公開したAgent Skillsのオープン標準仕様。SKILL.md形式をどのAIプラットフォームでも採用可能にするための標準化文書。
