@@ -1,232 +1,96 @@
-# Claude Code公式機能 実行基盤活性化記録
+# Claude Code Runtime 基盤（最終状態）
 
-> **担当**: フェーズ2補正タスク  
-> **最終更新**: 2026-04-12（runtime validation で補正済み。詳細は 09_claude_code_runtime_validation.md を参照）
-
----
-
-## 今回の目的
-
-Claude Code公式のHooks / Subagents / Skills / project settings を「後で評価する候補」ではなく、**プロジェクト標準の作業基盤**としてこのリポジトリに実装し、即時常用化すること。
-
-無料・ローカル完結・可逆・安全なものに限定し、project scopeで実装した。
+> **最終更新**: 2026-04-12
 
 ---
 
-## 導入対象候補一覧
+## 概要
 
-| 機能 | 判定 | 理由 |
-|------|------|------|
-| **Hooks（PreToolUse）** | **導入済み** | 正本文書保護。ローカル完結・可逆・安全 |
-| **Subagents（catalog-checker）** | **導入済み** | 候補カタログ整合性検査。Read/Grep/Globのみ使用 |
-| **Subagents（scope-guard）** | **導入済み** | 作業範囲逸脱監査。Read/Grep/Globのみ使用 |
-| **Subagents（phase-reporter）** | **導入済み** | 完了報告定型化。Agent toolで呼び出し。旧skill版から置き換え |
-| **Project settings** | **導入済み** | permissions + hooks設定 |
-| Hooks（SessionStart） | 導入見送り | コンテキスト注入は有用だが、CLAUDE.mdと重複する。過剰な自動注入はコンテキスト消費の原因になるため見送り |
-| Hooks（PostToolUse） | 導入見送り | ログ記録は有用だが、全ツール実行後にログを取ると性能影響が大きい。必要時にスポット導入 |
-| Hooks（Stop） | 導入見送り | セッション完了時の自動記録はユーザーのグローバルStop hookと競合する可能性がある |
-| Agent Teams | 導入見送り | experimental機能。環境変数設定が必要で可逆性に不安。成熟後に再検討 |
-| Memory Tool（API） | 導入見送り | API呼び出しが必要で無料・ローカル完結の条件を満たさない |
+Claude Code 公式機能をプロジェクト標準の作業基盤として project scope に実装した。全て無料・ローカル完結・可逆・安全。
 
 ---
 
-## 導入したもの
+## 導入済み機能
 
-### 1. Hooks: 正本文書保護（PreToolUse）
+### 1. 正本文書保護 Hook
 
-**ファイル**: `.claude/hooks/protect-canonical.sh`  
-**設定**: `.claude/settings.json` の hooks.PreToolUse
+| 項目 | 内容 |
+|------|------|
+| ファイル | `.claude/hooks/protect-canonical.sh` |
+| 設定 | `.claude/settings.json` hooks.PreToolUse |
+| 発動条件 | Edit / Write で正本文書のパスにマッチした場合 |
+| 動作 | exit 2 でブロック。成果物ファイルは exit 0 で通す |
 
-**機能**: Edit/Write ツールが正本文書（要件定義書・作業指示書・上位文書）を対象にした場合、exit 2 でブロックする。
+**保護対象**: 大分類要件提起書、大分類作業指示書、フェーズ1要件定義書、フェーズ1作業指示書、フェーズ２要件定義書、フェーズ２作業指示書
 
-**保護対象パターン**:
-- 大分類要件提起書
-- 大分類作業指示書
-- フェーズ1 要件定義書
-- フェーズ1作業指示書
-- フェーズ２ 要件定義書
-- フェーズ２作業指示書
+### 2. catalog-checker（subagent）
 
-**動作原理**: 
-1. PreToolUse イベントでEdit/Writeが呼ばれると、stdin にJSON（tool_name, tool_input）が渡される
-2. python3 でfile_pathを抽出
-3. 保護パターンとマッチすればexit 2（ブロック）、マッチしなければexit 0（許可）
+| 項目 | 内容 |
+|------|------|
+| ファイル | `.claude/agents/catalog-checker.md` |
+| 呼び出し | Agent tool（model: haiku） |
+| ツール | Read, Grep, Glob（読取専用） |
+| 用途 | 候補カタログの整合性を5項目で検査 |
+| 使用時機 | 候補追加後、参照修正後、コミット前 |
 
----
+検査項目: item_id連番、参照整合性、所属マップ整合、current_status妥当性、必須フィールド
 
-### 2. Subagent: catalog-checker
+### 3. scope-guard（subagent）
 
-**ファイル**: `.claude/agents/catalog-checker.md`  
-**モデル**: haiku  
-**ツール**: Read, Grep, Glob（読取専用）
+| 項目 | 内容 |
+|------|------|
+| ファイル | `.claude/agents/scope-guard.md` |
+| 呼び出し | Agent tool（model: haiku）。作業説明を prompt に含める |
+| ツール | Read, Grep, Glob（読取専用） |
+| 用途 | 作業範囲の逸脱監査 |
+| 使用時機 | グループ完了時、コミット前 |
 
-**機能**: 候補カタログ（02_candidate_catalog.md）の整合性を5項目で検査する
-1. item_id連番確認（欠番・重複検出）
-2. 参照整合性（引き継ぎ文書との整合）
-3. 比較グループ所属マップとの整合
-4. current_status妥当性（9状態のいずれかか）
-5. 必須フィールド欠落チェック
+監査内容: 作業契約との照合、成果物一覧確認、正本文書補助確認（hookが主防御）、禁止キーワード検索
 
----
+### 4. phase-reporter（subagent）
 
-### 3. Subagent: scope-guard
+| 項目 | 内容 |
+|------|------|
+| ファイル | `.claude/agents/phase-reporter.md` |
+| 呼び出し | Agent tool（model: haiku）。git情報と作業概要を prompt に含める |
+| ツール | Read, Grep, Glob（読取専用） |
+| 用途 | 完了報告書を定型6セクションで生成 |
+| 使用時機 | グループ完了報告時 |
 
-**ファイル**: `.claude/agents/scope-guard.md`  
-**モデル**: haiku  
-**ツール**: Read, Grep, Glob（読取専用）
-
-**機能**: 直近の作業が現在のフェーズ/グループの範囲内かを監査する
-- 正本文書の変更有無
-- 本番構築への踏み込み有無
-- フェーズ前倒し有無
-- 有料API/SaaS前提有無
-- 判断範囲の逸脱有無
-
----
-
-### 4. Subagent: phase-reporter（skill から置き換え）
-
-**ファイル**: `.claude/agents/phase-reporter.md`  
-**呼び出し**: Agent tool（model: haiku）。呼び出し元がgit情報と作業概要を渡す
-
-**経緯**: 当初 `.claude/skills/phase-report/SKILL.md` として実装したが、Skill tool のレジストリにカスタムskillが自動登録されず呼び出し不能だった。subagent（`.claude/agents/`）なら Agent tool で確実に呼び出せることを他の2 subagentで実証済みのため、**skill を廃止し subagent へ置き換えた**。
-
-**機能**: フェーズのグループ完了報告書を定型フォーマットで生成する。以下のセクションを含む:
-1. 実施概要
-2. 作成・更新ファイル一覧
-3. 成果物の要点
-4. 逸脱防止確認チェックリスト
-5. GitHub確認情報
-6. 後続グループへの引き継ぎ
-
-**呼び出し方**:
-```
-Agent tool で呼び出す。promptに以下を含めること:
-- 対象（どのグループ・タスクの報告か）
-- git情報（git log --oneline -5 と git diff --stat の結果）
-- 作業概要（やったこと、やらなかったこと）
-```
-
----
+出力セクション: 実施概要、ファイル一覧、成果物要点、逸脱防止確認、GitHub情報、後続引き継ぎ
 
 ### 5. Project Settings
 
-**ファイル**: `.claude/settings.json`
-
-**内容**:
-- **hooks**: PreToolUse で正本保護hookを有効化
-- **permissions.allow**: Read, Glob, Grep, 公式ドメインWebFetch, WebSearch を自動許可
-- **permissions.deny**: `rm -rf /`, `git push --force`, `git reset --hard`, `git checkout -- .` を拒否
-
----
-
-## 導入しなかったものと理由
-
-| 機能 | 見送り理由 |
-|------|-----------|
-| SessionStart hook | CLAUDE.mdによるコンテキスト注入と重複。追加するとコンテキストトークンを無駄に消費する |
-| PostToolUse hook | 全ツール実行後のログは性能影響が大きい。スポット的に追加すべき |
-| Stop hook | ユーザーのグローバルStop hook（会話ログ自動保存）と競合する可能性がある |
-| Agent Teams | experimental機能（CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 必要）。安定性に不安 |
-| Memory Tool API | API呼び出し前提で無料・ローカル完結の条件を満たさない |
-| HTTP/Prompt型hook | 外部サーバーまたはLLM呼び出しが必要。ローカル完結の条件を満たさない |
+| 項目 | 内容 |
+|------|------|
+| ファイル | `.claude/settings.json` |
+| hooks | PreToolUse で正本保護を自動実行 |
+| allow | Read, Glob, Grep, 公式ドメインWebFetch, WebSearch |
+| deny | rm -rf, git push --force/-f, git reset --hard, git checkout --, git clean -fd |
 
 ---
 
-## 実際にこのタスク中で使った証跡
+## 導入見送り
 
-### catalog-checker の実行結果
-
-**検出された問題（3件）**:
-1. **F-032〜F-038が比較グループ所属マップ（02_comparison_units_and_matrix_plan.md パート4）に未反映** → グループ3以降で02のパート4を更新する必要がある
-2. F-032〜F-038は05（引き継ぎ文書）で参照されていない → フェーズ2内で整合させる必要がある
-3. 上記以外の項目は全て問題なし（item_id連番OK、current_status妥当、必須フィールド完備）
-
-### scope-guard の実行結果
-
-**監査結果: 合格**
-- 正本文書の変更なし
-- 本番構築への踏み込みなし
-- フェーズ前倒しなし
-- 有料API/SaaS前提なし
-- rename/move/deleteなし
-- 軽微注意: 02_candidate_catalogへの候補追加はグループ2の許可範囲内だが、今後は控えるのが工程明確性に寄与
-
-### phase-report スキルの実行
-
-- SKILL.md のテンプレートに従い、runtime validation タスク自身の報告を生成
-- フォーマット6セクション（実施概要/ファイル一覧/成果物要点/逸脱確認/GitHub情報/引き継ぎ）の生成を確認
-- 完了報告の必須項目をカバーしていることを実動作で検証済み
-
-### 正本保護hookの動作確認
-
-- **テスト1**: 正本文書（フェーズ２要件定義書）への編集 → **ブロック成功（exit 2）**
-  ```
-  正本文書の直接編集をブロックしました: ５.フェーズ２ 要件定義書.md
-  ```
-- **テスト2**: 成果物ファイルへの編集 → **許可成功（exit 0）**
-
----
-
-## 安全性確認
-
-| 確認項目 | 結果 |
-|---------|------|
-| project scope限定か | ✅ 全て `.claude/` 配下または `phase2_decision_foundation/` 内 |
-| user-global 変更がないか | ✅ `~/.claude/` は一切変更していない |
-| 可逆性があるか | ✅ `.claude/settings.json` 削除 + `.claude/agents/` `.claude/skills/` `.claude/hooks/` 削除で完全復元 |
-| 有料APIを使っていないか | ✅ 全てローカル完結（hookはbash、subagentsはhaiku+読取専用ツール、skillは定型テンプレート） |
-| 危険な自動実行がないか | ✅ hookはブロック方向のみ（許可は何もしない）。subagentsは読取専用。deny設定で破壊コマンド拒否 |
-| 既存設定との競合がないか | ✅ `.claude/settings.local.json`（既存）とは別ファイル。settings.jsonはproject scope |
-
----
-
-## 後続作業での使い方
-
-### catalog-checker
-```
-グループ完了時にAgent toolで呼び出し、候補カタログの整合性を検証する。
-特に新候補追加後やitem_id参照修正後に実行推奨。
-```
-
-### scope-guard
-```
-グループ作業の途中または完了時にAgent toolで呼び出し、作業範囲の逸脱がないか監査する。
-コミット前の自己検査として利用推奨。
-```
-
-### phase-reporter
-```
-Agent tool (model: haiku) で呼び出す。
-promptにgit情報と作業概要を渡すと、定型フォーマットの完了報告書を生成する。
-```
-
-### 正本保護hook
-```
-自動実行。Edit/Writeで正本文書を編集しようとすると自動的にブロックされる。
-新しい正本文書が追加された場合は .claude/hooks/protect-canonical.sh のパターンに追記する。
-```
+| 機能 | 理由 |
+|------|------|
+| SessionStart hook | CLAUDE.md のコンテキスト注入と重複 |
+| PostToolUse hook | 全ツール後のログは性能影響大 |
+| Stop hook | ユーザーのグローバル Stop hook と競合 |
+| Agent Teams | experimental。安定性に不安 |
+| Memory Tool API | API呼び出し前提。無料・ローカル完結の条件外 |
 
 ---
 
 ## 巻き戻し方法
 
-全ての導入を完全に巻き戻すには:
-
 ```bash
-# 1. hookスクリプトを削除
-rm -r .claude/hooks/
+# 全巻き戻し（settings.local.json は保持）
+rm -r .claude/hooks/ .claude/agents/ && rm .claude/settings.json
 
-# 2. subagentsを削除
-rm -r .claude/agents/
-
-# 3. project設定を削除（settings.local.jsonは保持）
-rm .claude/settings.json
-
-# 4. コミットで記録
-git add -A && git commit -m "revert: Claude Code runtime activation を巻き戻し"
+# 個別巻き戻し
+rm .claude/hooks/protect-canonical.sh    # hook だけ無効化
+rm .claude/agents/catalog-checker.md     # catalog-checker だけ無効化
+rm .claude/agents/scope-guard.md         # scope-guard だけ無効化
+rm .claude/agents/phase-reporter.md      # phase-reporter だけ無効化
 ```
-
-個別に巻き戻す場合:
-- hookだけ無効化: `.claude/settings.json` の hooks セクションを空にする
-- subagentだけ無効化: `.claude/agents/` 内の対象ファイルを削除
