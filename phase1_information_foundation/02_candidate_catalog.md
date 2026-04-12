@@ -661,4 +661,136 @@
 | F-008 | Agent Teams | 監視継続 | 実験的機能。制限多数（セッション再開不可等）。成熟を待って再評価 |
 | F-012 | Advisor Tool | 監視継続 | 2026-04-09公開ベータ。潜在的に重要だが成熟度が不明。public betaのため採用判断は時期尚早 |
 | F-030 | OpenAI Agents SDK | 監視継続 | Anthropicエコシステムの主採用対象ではないが、設計比較・差別化確認のため継続監視 |
-| F-007 | Cowork | 監視継続 | 製品ページ確認済みだがAPI詳細未確認。開発者向けAPIの有無・アクセス方法を確認してから判断 |
+| F-007 | Cowork | 監視継続 | 製品ページ確認済みだがAPI詳細未確認。Research preview状態。開発者向けAPIの有無・アクセス方法を確認してから判断 |
+
+---
+
+## セクション4｜フェーズ2グループ2追加候補（2026-04-12）
+
+> GitHub追加探索で発見し、比較価値が高いと判断した候補。
+
+---
+
+#### F-032 | promptfoo
+
+- **item_id**: F-032
+- **item_name**: promptfoo
+- **item_type**: OSS
+- **layer_category**: 評価層
+- **vendor_owner**: promptfoo（OSS）
+- **source_url**: https://github.com/promptfoo/promptfoo
+- **summary**: プロンプト/LLM評価フレームワーク。YAML宣言的設定で複数モデルの出力を並べて比較。レッドチーミング・CI/CD統合。OpenAI・Anthropicが公式使用。
+- **primary_use_cases**: プロンプト品質テスト、モデル間比較、レッドチーミング、CI/CDパイプライン評価
+- **prerequisites**: Node.js 22.22.0以上。LLM呼び出し時はAPIキー必要
+- **current_status**: 調査中
+- **first_seen_at**: 2026-04-12
+- **last_checked_at**: 2026-04-12
+- **notes**: 19,964 stars。MIT。日次コミット。Anthropic公式使用。フェーズ2支援部品候補として最有力。比較対象: deepeval（F-033）。比較グループ: CG-03 / CG-06
+
+---
+
+#### F-033 | deepeval
+
+- **item_id**: F-033
+- **item_name**: deepeval
+- **item_type**: OSS
+- **layer_category**: 評価層
+- **vendor_owner**: Confident AI（OSS）
+- **source_url**: https://github.com/confident-ai/deepeval
+- **summary**: Python-nativeのLLM評価ライブラリ。14+の評価メトリクス（faithfulness, relevancy, hallucination, toxicity等）。pytest風テストランナー。
+- **primary_use_cases**: LLM出力品質の定量評価、回帰テスト、メトリクスベースの品質ゲート
+- **prerequisites**: Python。pip install deepeval
+- **current_status**: 調査中
+- **first_seen_at**: 2026-04-12
+- **last_checked_at**: 2026-04-12
+- **notes**: 14,716 stars。promptfoo（CLI/YAML中心）とは相補的（Python/pytest中心）。比較対象: promptfoo（F-032）。比較グループ: CG-03
+
+---
+
+#### F-034 | Langfuse
+
+- **item_id**: F-034
+- **item_name**: Langfuse
+- **item_type**: OSS
+- **layer_category**: 評価層
+- **vendor_owner**: Langfuse（YC W23）
+- **source_url**: https://github.com/langfuse/langfuse
+- **summary**: LLMエンジニアリングプラットフォーム。オブザーバビリティ、メトリクス、評価、プロンプト管理、プレイグラウンド、データセット管理。セルフホスト可能。LiteLLM/LangChain/OpenAI SDKとネイティブ統合。
+- **primary_use_cases**: LLMトレーシング、コスト追跡、評価ダッシュボード、プロンプトバージョン管理
+- **prerequisites**: Docker + PostgreSQL（セルフホスト）またはクラウド版アカウント
+- **current_status**: 調査中
+- **first_seen_at**: 2026-04-12
+- **last_checked_at**: 2026-04-12
+- **notes**: 24,760 stars。D-003から昇格。CG-03（evaluation/observability）の最有力候補の一つ。比較対象: Arize Phoenix（F-035）, deepeval（F-033）。比較グループ: CG-03
+
+---
+
+#### F-035 | Arize Phoenix
+
+- **item_id**: F-035
+- **item_name**: Arize Phoenix
+- **item_type**: OSS
+- **layer_category**: 評価層
+- **vendor_owner**: Arize AI（OSS）
+- **source_url**: https://github.com/Arize-ai/phoenix
+- **summary**: AIオブザーバビリティ＆評価プラットフォーム。LLMトレース、評価、実験管理。OpenTelemetry基盤。pip一発でローカル起動可能（Docker不要）。
+- **primary_use_cases**: LLMトレーシング、評価実験、データセット管理、ローカル開発時のデバッグ
+- **prerequisites**: Python。pip install arize-phoenix
+- **current_status**: 調査中
+- **first_seen_at**: 2026-04-12
+- **last_checked_at**: 2026-04-12
+- **notes**: 9,247 stars。Langfuse（Docker必要）よりセットアップが軽い。OpenTelemetry基盤で他ツールとの共存が容易。比較対象: Langfuse（F-034）。比較グループ: CG-03
+
+---
+
+#### F-036 | Portkey Gateway
+
+- **item_id**: F-036
+- **item_name**: Portkey AI Gateway
+- **item_type**: OSS
+- **layer_category**: 接続層
+- **vendor_owner**: Portkey AI（OSS）
+- **source_url**: https://github.com/portkey-ai/gateway
+- **summary**: 200+ LLMへのAIゲートウェイ。50+のAIガードレール内蔵。MCP対応。高速プロキシとして動作。
+- **primary_use_cases**: マルチモデルルーティング、ガードレール適用、コスト管理、フォールバック
+- **prerequisites**: Node.js or Docker
+- **current_status**: 調査中
+- **first_seen_at**: 2026-04-12
+- **last_checked_at**: 2026-04-12
+- **notes**: 11,280 stars。LiteLLM（F-022）の最有力代替候補。ガードレール内蔵とMCPネイティブ対応が差別化ポイント。比較対象: LiteLLM（F-022）, claude-code-router（F-020）。比較グループ: CG-01
+
+---
+
+#### F-037 | mcp-use
+
+- **item_id**: F-037
+- **item_name**: mcp-use
+- **item_type**: OSS
+- **layer_category**: 接続層
+- **vendor_owner**: mcp-use（OSS）
+- **source_url**: https://github.com/mcp-use/mcp-use
+- **summary**: MCPのフルスタックフレームワーク。ChatGPT/Claude向けMCPアプリの開発と、AIエージェント向けMCPサーバー構築を統合的に提供。MCP gateway/inspector機能も含む。
+- **primary_use_cases**: MCPアプリ開発、MCPサーバー構築、MCPサーバーの検査・テスト
+- **prerequisites**: TypeScript、npm
+- **current_status**: 調査中
+- **first_seen_at**: 2026-04-12
+- **last_checked_at**: 2026-04-12
+- **notes**: 9,762 stars。MIT。日次更新。Phase 2支援部品としては後続フェーズ向けだが、MCPエコシステムの包括的フレームワーク。比較グループ: CG-06
+
+---
+
+#### F-038 | MCP Inspector
+
+- **item_id**: F-038
+- **item_name**: MCP Inspector
+- **item_type**: 公式実装
+- **layer_category**: 評価層
+- **vendor_owner**: modelcontextprotocol（Anthropicリード）
+- **source_url**: https://github.com/modelcontextprotocol/inspector
+- **summary**: MCP公式の視覚的テストツール。Web UIでMCPサーバーに接続し、利用可能なツール/リソース/プロンプトを検査・インタラクティブにテスト可能。
+- **primary_use_cases**: MCPサーバーの開発・デバッグ、ツール/リソースの動作確認
+- **prerequisites**: Node.js
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-12
+- **last_checked_at**: 2026-04-12
+- **notes**: 9,403 stars。MCP公式開発ツール。Phase 1では未発見。MCP開発・テストに不可欠な公式ツール。比較グループ: CG-04
