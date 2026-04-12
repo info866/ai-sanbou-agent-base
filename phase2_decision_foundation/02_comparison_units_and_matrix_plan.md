@@ -123,12 +123,13 @@
 
 | item_id | 候補名 | 特徴（概要） |
 |---------|--------|-------------|
-| D-003 | Langfuse | LLMオブザーバビリティOSS。未詳細調査 |
+| F-034 | Langfuse | LLMエンジニアリングプラットフォーム。24.7k stars。D-003から昇格済み |
 | D-004 | Braintrust | LLM eval基盤。未詳細調査 |
 | D-005 | W&B Weave | ML実験管理・エージェント評価応用。未詳細調査 |
 | F-023 | mcp-eval | MCPサーバー評価。活動低迷（保留中） |
-| （追加枠） | promptfoo（フェーズ2支援部品候補） | グループ2で詳細調査 |
-| （追加枠） | グループ2のGitHub探索で発見された候補 | — |
+| F-032 | promptfoo | LLMテスト・Red Teaming。9.4k stars。グループ2で評価済み |
+| F-033 | deepeval | LLMユニットテストフレームワーク。7.7k stars |
+| F-035 | Arize Phoenix | OSS MLオブザーバビリティ。15.1k stars |
 
 **主要比較軸**: OSS vs SaaS、Claude Agent SDK統合容易性、コスト、セットアップ難易度
 **公式vsOSS観点**: Agent SDKのhooks機能でカスタムトレーシングが十分か、専用基盤が必要か
@@ -149,7 +150,7 @@
 | F-018 | MCP Registry | MCPサーバーの発見・管理 |
 | F-019 | MCP Servers | MCPサーバーのリファレンス実装集 |
 | F-026 | MCP Connector | API経由でのMCPサーバー直接接続。GA済み |
-| （追加枠） | RAG関連候補（グループ2で探索） | — |
+| F-038 | MCP Inspector | MCP公式視覚的テストツール。9.4k stars |
 
 **主要比較軸**: フェーズ3接続性、情報保持の永続性、検索精度、セットアップ容易性
 **注意**: RAGの本格実装はフェーズ3以降。ここではフェーズ2段階での接続準備のみ評価する
