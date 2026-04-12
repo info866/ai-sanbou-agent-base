@@ -128,7 +128,7 @@
 | CP-02 | orchestration主軸選択 | F-027（LangGraph）vs F-028（CrewAI）vs F-029（AutoGen） | 設計柔軟性 vs ロールベース手軽さ vs 会話駆動精度。Claude Agent SDKとの統合難易度も評価軸 |
 | CP-03 | 実行エージェント管理層 | F-003（Subagents）vs F-006（Claude Managed Agents） | 自己ホスト制御性 vs マネージドの運用コスト削減。betaのGA移行後に本格評価 |
 | CP-04 | MCPワークフロー層 | F-021（mcp-agent）vs F-027（LangGraph） | MCPファースト設計 vs グラフ制御の豊富さ |
-| CP-05 | evaluation・observability基盤 | D-003（Langfuse）vs D-004（Braintrust）vs D-005（W&B Weave） | OSS vs SaaS・コスト・Claude Agent SDKとの統合容易性 |
+| CP-05 | evaluation・observability基盤 | F-034（Langfuse）vs D-004（Braintrust）vs D-005（W&B Weave） | OSS vs SaaS・コスト・Claude Agent SDKとの統合容易性 |
 
 ---
 
@@ -141,7 +141,7 @@
 | UQ-01 | Claude Agent SDK と orchestrationフレームワーク（LangGraph等）はどう組み合わせるべきか | SDKはエージェントロジックの記述に使い、LangGraphは制御フローに使うという分担が有力だが、実際に相互運用できるかが未確認 | claude-agent-sdk-demosの実装内容確認・LangGraphのMCP/Claude SDK統合例確認 |
 | UQ-02 | Skills（SKILL.md）と Subagents（agents/*.md）の役割分担は何か | どちらも「専門エージェントへの委譲」を担えるように見えるが、呼び出し経路・コンテキスト共有・再利用形態が異なる可能性がある | Claude Code Skills Docs（A-012）と Sub-agents Docs（A-010）の詳細比較 |
 | UQ-03 | Managed Agentsは本プロジェクトの実行基盤として適切か | 2026-04-08公開betaのため詳細仕様が未確認。コンテナ設定・pricing・スケーリング特性が不明 | A-009の詳細API仕様確認・betaのGA移行後の制限緩和確認 |
-| UQ-04 | evaluation・observability基盤をいつ・どの形で導入するか | フェーズ2以降でエージェントの出力品質評価が必須になるが、評価基盤がない状態では参謀エージェントの信頼性を客観的に測定できない | D-003〜D-005の詳細調査。Claude Agent SDKとのトレーシング統合確認 |
+| UQ-04 | evaluation・observability基盤をいつ・どの形で導入するか | フェーズ2以降でエージェントの出力品質評価が必須になるが、評価基盤がない状態では参謀エージェントの信頼性を客観的に測定できない | F-034・D-004・D-005の詳細調査。Claude Agent SDKとのトレーシング統合確認 |
 | UQ-05 | ant CLIはプロジェクトの運用ワークフローに組み込むべきか | 2026-04-08リリースのClaude API用CLIツール（E-003）だが詳細不明。既存Claude Code CLIとの役割分担が不明 | ant CLIドキュメントURL確認・機能範囲の調査 |
 
 ---
@@ -153,7 +153,7 @@
 | # | 対象領域 | 流用候補 | 自作の根拠 | 判断に必要な情報 |
 |---|---------|---------|-----------|---------------|
 | BV-01 | エージェントオーケストレーション層 | LangGraph（F-027）/ mcp-agent（F-021） | Claude Agent SDK単体でも制御フローは実装可能。不要な依存を増やしたくない場合 | Claude Agent SDK Docsのworkflow制御機能の詳細確認（A-013）・LangGraph×SDK統合の実績確認 |
-| BV-02 | エージェント評価・モニタリング | Langfuse / Braintrust / W&B Weave（D-003〜D-005） | Agent SDKのhooks機能を使えばカスタムトレーシングも実装可能 | 各評価OSSのClaude Agent SDK対応状況・hooks経由の独自実装コスト比較 |
+| BV-02 | エージェント評価・モニタリング | Langfuse（F-034）/ Braintrust（D-004）/ W&B Weave（D-005） | Agent SDKのhooks機能を使えばカスタムトレーシングも実装可能 | 各評価OSSのClaude Agent SDK対応状況・hooks経由の独自実装コスト比較 |
 | BV-03 | Skills実装 | anthropics/skills（F-013）から既存スキル流用 | プロジェクト固有のワークフローはゼロから設計する方が適合度が高い | anthropics/skillsのスキル一覧と品質確認（B-001）・プロジェクト要件との適合度評価 |
 
 ---
@@ -206,7 +206,7 @@
 
 | 優先順位 | 論点 | 理由 | 関連item_id |
 |---------|------|------|-------------|
-| 1 | Evaluation / Observability基盤の選定 | 評価基盤なしには他の採用判断の品質を担保できない。フェーズ2で最初に確立すべき | D-003, D-004, D-005 |
+| 1 | Evaluation / Observability基盤の選定 | 評価基盤なしには他の採用判断の品質を担保できない。フェーズ2で最初に確立すべき | F-034, D-004, D-005 |
 | 2 | Claude Managed Agents詳細仕様の確認 | betaが解禁されている最新機能。実行基盤の主軸になりうるため、詳細確認が比較評価の前提 | F-006, A-009 |
 | 3 | LangGraph × Claude Agent SDK 統合方法の実証 | orchestration候補の最有力。実際に組み合わせて動くかを早期に確認することで後続設計の不確実性を除去 | F-027, F-009 |
 | 4 | claude-agent-sdk-demos実装内容の精査 | 公式参照実装。フェーズ3の実装方針確定前に参照実装を把握しておく必要がある | F-017 |
@@ -224,7 +224,7 @@
 - [x] 収集対象の分類軸が定義されている（→03 パート1: F1〜F4の全軸定義完了）
 - [x] 候補を状態管理できる構造が定義されている（→03 パート2: 9状態の意味・遷移条件定義完了）
 - [x] 各候補に対する最低記録項目が定義されている（→03 パート3: 共通必須16項目 + 追加管理8項目 + 公式5項目 + OSS9項目 定義完了）
-- [x] 既知の重要候補が初期調査対象として登録されている（→02: F-001〜F-031 全31候補登録済み）
+- [x] 既知の重要候補が初期調査対象として登録されている（→02: F-001〜F-038 全38候補登録済み）
 - [x] Claude Code の自律追加調査ルールが明文化されている（→04 パート6: 6ルール定義完了）
 - [x] フェーズ2で比較・評価に進めるだけの情報基盤要件が揃っている（→本ファイル パート2: 比較ペア5組・未解決論点5件・試験導入候補4件・優先論点5件 整備完了）
 - [x] 「継続的に増やしていく前提」が要件として明記されている（→04 パート6「既知候補依存の禁止」「GitHub再探索の義務」「保留・未確認の積極的解消ルール」に明記）
@@ -239,7 +239,7 @@
 
 **整備済み資産:**
 - 情報源32件（A/B/C/D/Eカテゴリ）
-- 候補カタログ31件（F-001〜F-031）
+- 候補カタログ38件（F-001〜F-038）
 - 分類軸4軸（F1:11種別 / F2:8機能層 / F3:5利用段階 / F4:8作業適用先）
 - 状態管理スキーマ（9状態 + 遷移条件）
 - 記録スキーマ（共通16 + 追加8 + 公式5 + OSS9 = 38フィールド定義）
