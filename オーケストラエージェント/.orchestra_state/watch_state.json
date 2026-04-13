@@ -1,10 +1,10 @@
 {
   "last_checked": {
-    "Claude Code CLI": "2026-04-13T20:49:10.226140",
-    "Anthropic SDK Python": "2026-04-13T20:49:10.434298",
-    "MCP Specification": "2026-04-13T20:49:10.719210",
-    "promptfoo": "2026-04-13T20:49:10.951451",
-    "Claude Model Aliases": "2026-04-13T20:49:10.951922"
+    "Claude Code CLI": "2026-04-13T21:16:29.111528",
+    "Anthropic SDK Python": "2026-04-13T21:16:29.316908",
+    "MCP Specification": "2026-04-13T21:16:29.628693",
+    "promptfoo": "2026-04-13T21:16:29.854353",
+    "Claude Model Aliases": "2026-04-13T21:16:29.855165"
   },
   "known_hashes": {
     "Claude Code CLI": "e0a7eec43d993e0f92f6bdfc7564a0669b2abd39e3cbfaa91185ff2ddb8af62f",

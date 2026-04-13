@@ -76,7 +76,13 @@ class Orchestrator:
         result["steps"]["classification"] = classification
 
         # Step 2: Model selection WITH Layer 11 overrides (closed loop)
-        overrides = self.improvement_loop.get_active_overrides().get("model_overrides", {})
+        # Filter to only valid SelectionInput fields
+        VALID_OVERRIDE_KEYS = {
+            "reasoning_weight", "ambiguity", "failure_cost",
+            "speed_priority", "context_size", "plan_weight",
+        }
+        raw_overrides = self.improvement_loop.get_active_overrides().get("model_overrides", {})
+        overrides = {k: v for k, v in raw_overrides.items() if k in VALID_OVERRIDE_KEYS}
         model_input = rc_to_model_input(classification, request, overrides or None)
         selector = ModelSelector()
         model_output = selector.select(model_input)

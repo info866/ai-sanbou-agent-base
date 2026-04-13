@@ -17,6 +17,8 @@
       "Read",
       "Glob",
       "Grep",
+      "Bash(python3 オーケストラエージェント/orchestrator.py*)",
+      "Bash(python3 オーケストラエージェント/proof_*)",
       "WebFetch(domain:code.claude.com)",
       "WebFetch(domain:platform.claude.com)",
       "WebFetch(domain:modelcontextprotocol.io)",
