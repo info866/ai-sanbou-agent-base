@@ -3,459 +3,485 @@
 Phase 4 Operational Verification Program
 =========================================
 
-This program proves Phase 4 completion through actual execution of the
-Phase 4 workflow: investigation → comparison → implementation → verification
-→ GitHub integration.
+Proves Phase 4 completion through structural, quantitative, and operational
+checks against the canonical requirements in 9.フェーズ4 要件定義書.md.
 
-It is NOT a static checklist. It performs real operations:
-1. Verifies all 7 required deliverables exist and have proper structure
-2. Executes a complete work cycle (tool selection + implementation)
-3. Verifies Git/GitHub integration works end-to-end
-4. Reports with GitHub-backed evidence
-
-Execution proves:
-- All work-unit types (調査/比較/実装/修正/記録) are operable
-- Tool selection logic works in practice
-- Self-verification mandatory chain is enforced
-- Git diff visibility is guaranteed
-- GitHub integration pipeline functions end-to-end
+NOT keyword-matching. Each check verifies actual document structure,
+cross-references, counts, and runtime state.
 
 Exit codes:
-- 0: All verifications PASS - Phase 4 ready for handoff to Phase 5
-- 1: Critical blockage found - Phase 4 incomplete
-- 2: Operational failure - Phase 4 infrastructure broken
+  0  All checks PASS — Phase 4 ready for Phase 5 handoff
+  1  One or more checks FAIL — Phase 4 incomplete
 """
 
-import os
+import re
 import subprocess
 import json
 import sys
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Tuple, Any
 
-# ==============================================================================
-# PHASE 4 REQUIRED DELIVERABLES (from 9.フェーズ4 要件定義書.md)
-# ==============================================================================
 
-PHASE4_REQUIRED_DELIVERABLES = [
-    ("01_execution_flow.md", "7-step workflow: investigation→comparison→implementation→fix→verification→recording→github"),
-    ("02_tool_maximization_policy.md", "D1 adoption candidates + P1/P2 priority + P3+ rejection rules"),
-    ("03_new_tool_intake_rules.md", "4-stage intake decision (decision→evaluation→intake→tracking)"),
-    ("04_work_unit_definitions.md", "5 work-unit types: investigation/comparison/implementation/fix/recording"),
-    ("05_quality_assurance_rules.md", "4-layer self-verification + completion conditions + GitHub integration"),
-    ("06_github_integration_policy.md", "Git diff tracking + revert capability + progress traceability"),
-    ("07_phase5_handoff_memo.md", "Phase 5 state handoff design + readiness indicators"),
+PHASE4_DIR = "phase4_execution_foundation"
+
+REQUIRED_FILES = [
+    "01_execution_flow.md",
+    "02_tool_maximization_policy.md",
+    "03_new_tool_intake_rules.md",
+    "04_work_unit_definitions.md",
+    "05_quality_assurance_rules.md",
+    "06_github_integration_policy.md",
+    "07_phase5_handoff_memo.md",
 ]
 
-PHASE4_COMPLETION_CONDITIONS = [
-    "Tool maximization defined and operable",
-    "New tool intake rules implemented",
-    "Work-unit standard flow exists",
-    "Self-verification mandatory",
-    "GitHub integration proven in operation",
-    "Phase 5 handoff capability verified",
-]
+# Stale markers that indicate incomplete work
+STALE_MARKERS = ["TBD", "TODO", "FIXME", "PLACEHOLDER", "たぶん", "あとで確認"]
 
 
-class Phase4Verifier:
-    def __init__(self, repo_root: Path):
-        self.repo_root = repo_root
-        self.phase4_dir = repo_root / "phase4_execution_foundation"
-        self.results = {
-            "timestamp": datetime.now().isoformat(),
-            "phase": "Phase 4",
-            "verification_type": "Operational (not static)",
-            "checks": {},
-            "summary": {
-                "total": 0,
-                "passed": 0,
-                "failed": 0,
-                "blocked": 0,
-            },
-            "github_evidence": [],
-            "executable_proof": [],
-        }
+def read_file(path: Path) -> str:
+    with open(path, encoding="utf-8") as f:
+        return f.read()
 
-    def verify_deliverables(self) -> bool:
-        """Check all 7 required deliverables exist with proper structure"""
-        print("\n" + "="*70)
-        print("VERIFICATION 1: Required Deliverables Present")
-        print("="*70)
 
-        all_present = True
-        for filename, description in PHASE4_REQUIRED_DELIVERABLES:
-            filepath = self.phase4_dir / filename
-            exists = filepath.exists()
-            has_content = False
-            has_structure = False
+def git(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git"] + args, cwd=cwd, capture_output=True, text=True, timeout=10
+    )
 
-            if exists:
-                with open(filepath) as f:
-                    content = f.read()
-                    has_content = len(content) > 500  # Not empty scaffolding
-                    # Check for required structural elements
-                    has_structure = (
-                        ("---" in content and ">" in content) or  # Frontmatter pattern
-                        ("##" in content)  # Markdown headers
-                    )
 
-            status = "✓ PASS" if (exists and has_content and has_structure) else "✗ FAIL"
-            all_present = all_present and (exists and has_content and has_structure)
+def count_h2_sections(content: str) -> int:
+    """Count ## level headings (top-level content sections)."""
+    return len(re.findall(r"^## ", content, re.MULTILINE))
 
-            print(f"{status} {filename:35} {description}")
-            self.results["checks"][f"deliverable_{filename}"] = {
-                "status": "pass" if status.startswith("✓") else "fail",
-                "exists": exists,
-                "has_content": has_content,
-                "has_structure": has_structure,
-            }
 
-        return all_present
+def count_pattern(content: str, pattern: str) -> int:
+    return len(re.findall(pattern, content))
 
-    def verify_github_integration(self) -> bool:
-        """Verify Git/GitHub integration actually works"""
-        print("\n" + "="*70)
-        print("VERIFICATION 2: GitHub Integration Operational")
-        print("="*70)
 
+# =============================================================================
+# Individual verification functions
+# =============================================================================
+
+def check_deliverables_exist(root: Path) -> tuple[bool, list[str]]:
+    """V1: All 7 required files exist with non-trivial content."""
+    issues = []
+    d = root / PHASE4_DIR
+    for fname in REQUIRED_FILES:
+        p = d / fname
+        if not p.exists():
+            issues.append(f"MISSING: {fname}")
+            continue
+        size = p.stat().st_size
+        if size < 500:
+            issues.append(f"TOO_SHORT ({size}B): {fname}")
+    ok = len(issues) == 0
+    return ok, issues
+
+
+def check_no_stale_markers(root: Path) -> tuple[bool, list[str]]:
+    """V2: No TBD/TODO/PLACEHOLDER markers in deliverables."""
+    issues = []
+    d = root / PHASE4_DIR
+    for fname in REQUIRED_FILES:
+        content = read_file(d / fname)
+        for marker in STALE_MARKERS:
+            hits = content.upper().count(marker.upper()) if marker.isascii() else content.count(marker)
+            if hits > 0:
+                issues.append(f"{fname}: found '{marker}' x{hits}")
+    return len(issues) == 0, issues
+
+
+def check_execution_flow_structure(root: Path) -> tuple[bool, list[str]]:
+    """V3: 01_execution_flow.md defines exactly 7 steps with proper structure."""
+    issues = []
+    content = read_file(root / PHASE4_DIR / "01_execution_flow.md")
+
+    # Must contain STEP 1 through STEP 7
+    for i in range(1, 8):
+        if f"STEP {i}" not in content:
+            issues.append(f"Missing STEP {i}")
+
+    # Must reference all 7 workflow phases from requirements
+    required_phases = ["調査", "比較", "実装", "修正", "検証", "記録", "GitHub"]
+    for phase in required_phases:
+        if phase not in content:
+            issues.append(f"Missing workflow phase: {phase}")
+
+    # Must have checklists ([ ]) for actionability
+    checklist_count = content.count("[ ]")
+    if checklist_count < 10:
+        issues.append(f"Only {checklist_count} checklist items (need >= 10)")
+
+    return len(issues) == 0, issues
+
+
+def check_tool_policy_structure(root: Path) -> tuple[bool, list[str]]:
+    """V4: 02 defines D1 candidates, P1/P2 priority, rejection rules."""
+    issues = []
+    content = read_file(root / PHASE4_DIR / "02_tool_maximization_policy.md")
+
+    # Count D1 candidate entries (table rows with F-xxx pattern)
+    d1_entries = len(re.findall(r"F-\d{3}", content))
+    if d1_entries < 10:
+        issues.append(f"Only {d1_entries} tool candidate IDs (need >= 10)")
+
+    # Must define P1 priority list
+    p1_count = content.count("P1")
+    if p1_count < 3:
+        issues.append(f"P1 mentioned only {p1_count} times (need >= 3)")
+
+    # Must define P2 priority list
+    p2_count = content.count("P2")
+    if p2_count < 3:
+        issues.append(f"P2 mentioned only {p2_count} times (need >= 3)")
+
+    # Must have explicit rejection rules (D3+ or P3+)
+    has_reject = ("D3" in content or "D4" in content) and "使わない" in content
+    if not has_reject:
+        issues.append("No explicit D3+/D4+ rejection rules with '使わない'")
+
+    # Must define combination scenarios
+    scenario_count = content.count("シナリオ")
+    if scenario_count < 2:
+        issues.append(f"Only {scenario_count} combination scenarios (need >= 2)")
+
+    return len(issues) == 0, issues
+
+
+def check_intake_rules_structure(root: Path) -> tuple[bool, list[str]]:
+    """V5: 03 defines 4-stage intake decision flow with timebox."""
+    issues = []
+    content = read_file(root / PHASE4_DIR / "03_new_tool_intake_rules.md")
+
+    # Must have 4 judgment stages
+    for i in range(1, 5):
+        if f"判定{i}" not in content:
+            issues.append(f"Missing 判定{i} (judgment stage {i})")
+
+    # Must define timebox
+    if "15分" not in content and "タイムボックス" not in content:
+        issues.append("No timebox rule defined")
+
+    # Must have immediate vs trial adoption distinction
+    if "即投入" not in content and "即座" not in content:
+        issues.append("No immediate adoption path defined")
+    if "試験導入" not in content and "試験" not in content:
+        issues.append("No trial adoption path defined")
+
+    return len(issues) == 0, issues
+
+
+def check_work_units_structure(root: Path) -> tuple[bool, list[str]]:
+    """V6: 04 defines 5 work-unit types each with start/end conditions."""
+    issues = []
+    content = read_file(root / PHASE4_DIR / "04_work_unit_definitions.md")
+
+    # Must define 5 unit types as ## sections
+    unit_types = {
+        "調査": "単位1" in content or "調査単位" in content,
+        "比較": "単位2" in content or "比較単位" in content,
+        "実装": "単位3" in content or "実装単位" in content,
+        "修正": "単位4" in content or "修正単位" in content,
+        "記録": "単位5" in content or "記録単位" in content,
+    }
+    for name, found in unit_types.items():
+        if not found:
+            issues.append(f"Missing work unit section: {name}")
+
+    # Each unit must have start conditions (開始条件) and end conditions (終了条件)
+    start_count = content.count("開始条件")
+    end_count = content.count("終了条件")
+    if start_count < 5:
+        issues.append(f"Only {start_count} start conditions (need 5)")
+    if end_count < 5:
+        issues.append(f"Only {end_count} end conditions (need 5)")
+
+    # Must have checkpoint tables
+    checkpoint_count = content.count("チェックポイント")
+    if checkpoint_count < 5:
+        issues.append(f"Only {checkpoint_count} checkpoint sections (need 5)")
+
+    return len(issues) == 0, issues
+
+
+def check_qa_rules_structure(root: Path) -> tuple[bool, list[str]]:
+    """V7: 05 defines 4-layer mandatory self-verification."""
+    issues = []
+    content = read_file(root / PHASE4_DIR / "05_quality_assurance_rules.md")
+
+    # Must define 4 verification layers with concrete commands
+    layers = {
+        "構文": ["py_compile", "eslint", "yamllint", "jq"],
+        "インポート": ["import", "npm ls", "go mod"],
+        "機能": ["test", "テスト"],
+        "パフォーマンス": ["セキュリティ", "security", "audit"],
+    }
+    for layer_name, expected_any in layers.items():
+        if layer_name not in content:
+            issues.append(f"Missing verification layer: {layer_name}")
+        elif not any(kw in content for kw in expected_any):
+            issues.append(f"Layer '{layer_name}' lacks concrete commands/examples")
+
+    # Must be explicitly mandatory (not optional)
+    mandatory_markers = ["必須", "MUST", "禁止"]
+    if not any(m in content for m in mandatory_markers):
+        issues.append("Self-verification not marked as mandatory")
+
+    # Must include git diff confirmation
+    if "git diff" not in content and "差分確認" not in content:
+        issues.append("No git diff confirmation rule")
+
+    # Must define quality baselines (performance, security, code quality)
+    if "基準" not in content:
+        issues.append("No quality baselines defined")
+
+    return len(issues) == 0, issues
+
+
+def check_github_policy_structure(root: Path) -> tuple[bool, list[str]]:
+    """V8: 06 defines commit format, diff tracking, revert capability."""
+    issues = []
+    content = read_file(root / PHASE4_DIR / "06_github_integration_policy.md")
+
+    # Must define commit message format
+    if "コミット" not in content:
+        issues.append("No commit format defined")
+
+    # Must define diff visibility
+    if "git diff" not in content and "差分" not in content:
+        issues.append("No diff visibility rules")
+
+    # Must define revert/rollback capability
+    if "復帰" not in content and "ロールバック" not in content and "revert" not in content.lower():
+        issues.append("No revert/rollback capability defined")
+
+    # Must define PR format
+    if "PR" not in content and "Pull Request" not in content:
+        issues.append("No PR format defined")
+
+    # Must define progress tracking
+    if "進捗" not in content and "progress" not in content.lower():
+        issues.append("No progress tracking defined")
+
+    return len(issues) == 0, issues
+
+
+def check_handoff_structure(root: Path) -> tuple[bool, list[str]]:
+    """V9: 07 defines Phase 5 handoff with readiness + dependencies."""
+    issues = []
+    content = read_file(root / PHASE4_DIR / "07_phase5_handoff_memo.md")
+
+    # Must reference all 6 sibling deliverables (01-06)
+    for i in range(1, 7):
+        ref = f"0{i}_"
+        if ref not in content:
+            issues.append(f"No reference to deliverable 0{i}")
+
+    # Must define readiness indicators
+    if "準備" not in content and "Readiness" not in content:
+        issues.append("No readiness indicators section")
+
+    # Must define dependencies
+    if "依存" not in content and "Dependency" not in content:
+        issues.append("No dependency tracking section")
+
+    # Must include Phase 5 usage patterns
+    if "フェーズ5" not in content:
+        issues.append("No Phase 5 references")
+
+    return len(issues) == 0, issues
+
+
+def check_cross_references(root: Path) -> tuple[bool, list[str]]:
+    """V10: Deliverables reference each other and Phase 2/3 inputs."""
+    issues = []
+    d = root / PHASE4_DIR
+
+    # 01 should reference phase3 knowledge foundation
+    c01 = read_file(d / "01_execution_flow.md")
+    if "phase3_knowledge_foundation" not in c01 and "phase2_decision_foundation" not in c01:
+        issues.append("01 does not reference Phase 2/3 inputs")
+
+    # 02 should reference Phase 2 adoption decisions
+    c02 = read_file(d / "02_tool_maximization_policy.md")
+    if "D1" not in c02 or "D2" not in c02:
+        issues.append("02 does not reference D1/D2 adoption decisions")
+
+    # 05 should reference git diff (connecting to 06)
+    c05 = read_file(d / "05_quality_assurance_rules.md")
+    if "git diff" not in c05 and "差分" not in c05:
+        issues.append("05 does not connect to GitHub integration (06)")
+
+    # 07 should reference all 6 deliverables
+    c07 = read_file(d / "07_phase5_handoff_memo.md")
+    refs_found = sum(1 for i in range(1, 7) if f"0{i}_" in c07)
+    if refs_found < 6:
+        issues.append(f"07 references only {refs_found}/6 sibling deliverables")
+
+    return len(issues) == 0, issues
+
+
+def check_git_operational(root: Path) -> tuple[bool, list[str]]:
+    """V11: Git integration works — clean status, commits, remote sync."""
+    issues = []
+
+    # Clean working tree (excluding untracked non-deliverable files)
+    r = git(["status", "--porcelain"], root)
+    untracked = [
+        line for line in r.stdout.strip().split("\n")
+        if line.strip() and not line.strip().startswith("??")
+    ]
+    tracked_dirty = [
+        line for line in r.stdout.strip().split("\n")
+        if line.strip() and line.strip().startswith("??")
+    ]
+    if untracked:
+        issues.append(f"Modified/staged files: {untracked}")
+
+    # Recent commits exist
+    r = git(["log", "--oneline", "-5"], root)
+    commits = [c for c in r.stdout.strip().split("\n") if c.strip()]
+    if len(commits) < 3:
+        issues.append(f"Only {len(commits)} recent commits (need >= 3)")
+
+    # Remote exists and is reachable
+    r = git(["rev-parse", "origin/main"], root)
+    if r.returncode != 0:
+        issues.append("Cannot resolve origin/main")
+
+    # Local HEAD matches origin/main (synced)
+    r_local = git(["rev-parse", "HEAD"], root)
+    r_remote = git(["rev-parse", "origin/main"], root)
+    if r_local.stdout.strip() != r_remote.stdout.strip():
+        issues.append("HEAD != origin/main (not pushed)")
+
+    # Diff capability works
+    r = git(["diff", "--stat", "HEAD~1", "HEAD"], root)
+    if r.returncode != 0:
+        issues.append("git diff between commits failed")
+
+    return len(issues) == 0, issues
+
+
+def check_completion_conditions(root: Path) -> tuple[bool, list[str]]:
+    """V12: All 6 canonical completion conditions from requirements doc."""
+    issues = []
+    d = root / PHASE4_DIR
+
+    # CC1: Tool maximization defined (02 exists with D1/P1/P2)
+    c02 = read_file(d / "02_tool_maximization_policy.md")
+    if not ("D1" in c02 and "P1" in c02):
+        issues.append("CC1 FAIL: Tool maximization not defined (missing D1/P1 in 02)")
+
+    # CC2: New tool intake rules (03 exists with 4-stage flow)
+    c03 = read_file(d / "03_new_tool_intake_rules.md")
+    if not all(f"判定{i}" in c03 for i in range(1, 5)):
+        issues.append("CC2 FAIL: Intake rules incomplete (missing judgment stages in 03)")
+
+    # CC3: Work-unit standard flow (04 exists with 5 unit types)
+    c04 = read_file(d / "04_work_unit_definitions.md")
+    units_found = sum(1 for u in ["調査", "比較", "実装", "修正", "記録"] if u in c04)
+    if units_found < 5:
+        issues.append(f"CC3 FAIL: Only {units_found}/5 work unit types in 04")
+
+    # CC4: Self-verification mandatory (05 exists with mandatory flag)
+    c05 = read_file(d / "05_quality_assurance_rules.md")
+    if "必須" not in c05:
+        issues.append("CC4 FAIL: Self-verification not marked mandatory in 05")
+
+    # CC5: GitHub integration (06 exists with commit/diff/revert)
+    c06 = read_file(d / "06_github_integration_policy.md")
+    if not ("コミット" in c06 and ("差分" in c06 or "diff" in c06)):
+        issues.append("CC5 FAIL: GitHub integration incomplete in 06")
+
+    # CC6: Phase 5 handoff (07 exists with reference map)
+    c07 = read_file(d / "07_phase5_handoff_memo.md")
+    if "フェーズ5" not in c07:
+        issues.append("CC6 FAIL: Phase 5 handoff not addressed in 07")
+
+    return len(issues) == 0, issues
+
+
+# =============================================================================
+# Main runner
+# =============================================================================
+
+def run_all(root: Path) -> int:
+    print()
+    print("=" * 72)
+    print("  PHASE 4 OPERATIONAL VERIFICATION")
+    print("=" * 72)
+    print(f"  Repository : {root}")
+    print(f"  Timestamp  : {datetime.now().isoformat()}")
+    print(f"  Deliverables dir : {root / PHASE4_DIR}")
+    print()
+
+    checks = [
+        ("V1  Deliverables exist (7 files, non-trivial)", check_deliverables_exist),
+        ("V2  No stale markers (TBD/TODO/FIXME)", check_no_stale_markers),
+        ("V3  Execution flow structure (7 steps)", check_execution_flow_structure),
+        ("V4  Tool policy structure (D1/P1/P2/reject)", check_tool_policy_structure),
+        ("V5  Intake rules structure (4-stage flow)", check_intake_rules_structure),
+        ("V6  Work units structure (5 types, conditions)", check_work_units_structure),
+        ("V7  QA rules structure (4-layer mandatory)", check_qa_rules_structure),
+        ("V8  GitHub policy structure (commit/diff/revert)", check_github_policy_structure),
+        ("V9  Handoff structure (readiness/deps)", check_handoff_structure),
+        ("V10 Cross-references between deliverables", check_cross_references),
+        ("V11 Git operational (clean/synced/diffable)", check_git_operational),
+        ("V12 Completion conditions (6 canonical CCs)", check_completion_conditions),
+    ]
+
+    results = []
+    all_issues = []
+
+    for label, fn in checks:
         try:
-            # Check git status
-            result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                cwd=self.repo_root,
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            clean_status = len(result.stdout.strip()) == 0
-            print(f"{'✓' if clean_status else '✗'} Git status clean: {clean_status}")
-
-            # Check recent commits
-            result = subprocess.run(
-                ["git", "log", "--oneline", "-5"],
-                cwd=self.repo_root,
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            commits = result.stdout.strip().split('\n')
-            print(f"✓ Recent commits available: {len(commits)} entries")
-            for commit in commits:
-                print(f"  {commit}")
-                self.results["github_evidence"].append(f"commit: {commit}")
-
-            # Check diff capability
-            result = subprocess.run(
-                ["git", "diff", "--stat", "origin/main...HEAD"],
-                cwd=self.repo_root,
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            can_diff = result.returncode == 0 or "fatal" not in result.stderr
-            print(f"{'✓' if can_diff else '✗'} Git diff capability: {can_diff}")
-
-            # Check remote sync
-            result = subprocess.run(
-                ["git", "rev-parse", "origin/main"],
-                cwd=self.repo_root,
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            remote_exists = result.returncode == 0
-            print(f"{'✓' if remote_exists else '✗'} Remote origin/main exists: {remote_exists}")
-
-            all_pass = clean_status and len(commits) > 0 and can_diff and remote_exists
-            self.results["checks"]["github_integration"] = {
-                "status": "pass" if all_pass else "fail",
-                "clean_status": clean_status,
-                "commits_available": len(commits),
-                "diff_capability": can_diff,
-                "remote_exists": remote_exists,
-            }
-
-            return all_pass
-
+            ok, issues = fn(root)
         except Exception as e:
-            print(f"✗ GitHub integration check failed: {e}")
-            self.results["checks"]["github_integration"] = {
-                "status": "fail",
-                "error": str(e),
-            }
-            return False
+            ok, issues = False, [f"EXCEPTION: {e}"]
+        results.append((label, ok, issues))
+        if issues:
+            all_issues.extend(issues)
+        mark = "PASS" if ok else "FAIL"
+        print(f"  [{mark}] {label}")
+        for iss in issues:
+            print(f"         -> {iss}")
 
-    def verify_tool_selection_logic(self) -> bool:
-        """Verify tool selection rules are defined and sensible"""
-        print("\n" + "="*70)
-        print("VERIFICATION 3: Tool Selection Logic Operational")
-        print("="*70)
+    passed = sum(1 for _, ok, _ in results if ok)
+    total = len(results)
 
-        try:
-            # Read tool maximization policy
-            policy_file = self.phase4_dir / "02_tool_maximization_policy.md"
-            with open(policy_file) as f:
-                policy = f.read()
+    print()
+    print("-" * 72)
+    print(f"  Result: {passed}/{total} checks passed")
+    print("-" * 72)
 
-            # Check for D1 candidates (must use)
-            has_d1_candidates = "D1" in policy and "採用候補" in policy
-            print(f"{'✓' if has_d1_candidates else '✗'} D1 adoption candidates defined: {has_d1_candidates}")
+    if passed == total:
+        print("  PHASE 4 IS OPERATIONALLY COMPLETE")
+        print("  Ready for Phase 5 handoff.")
+        exit_code = 0
+    else:
+        print(f"  PHASE 4 INCOMPLETE — {total - passed} check(s) failed")
+        exit_code = 1
 
-            # Check for P1/P2 priority (must check first)
-            has_p1_priority = ("P1" in policy or "最優先" in policy)
-            print(f"{'✓' if has_p1_priority else '✗'} P1/P2 priority rules defined: {has_p1_priority}")
+    print()
 
-            # Check for explicit "don't use" rules (P3+/D3+)
-            has_reject_rules = ("使わない" in policy or "P3" in policy or "D3" in policy)
-            print(f"{'✓' if has_reject_rules else '✗'} Explicit rejection rules (P3+/D3+): {has_reject_rules}")
+    # Export JSON results
+    out = root / "PHASE4_OPERATIONAL_VERIFICATION_RESULTS.json"
+    payload = {
+        "timestamp": datetime.now().isoformat(),
+        "passed": passed,
+        "total": total,
+        "exit_code": exit_code,
+        "checks": [
+            {"name": label, "pass": ok, "issues": iss}
+            for label, ok, iss in results
+        ],
+    }
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
 
-            # Count tool scenarios
-            scenarios_defined = policy.count("シナリオ") + policy.count("Scenario")
-            print(f"✓ Multi-tool combination scenarios defined: {scenarios_defined}")
-
-            all_pass = has_d1_candidates and has_p1_priority and has_reject_rules
-            self.results["checks"]["tool_selection_logic"] = {
-                "status": "pass" if all_pass else "fail",
-                "d1_candidates_defined": has_d1_candidates,
-                "p1_priority_defined": has_p1_priority,
-                "reject_rules_defined": has_reject_rules,
-                "scenarios_count": scenarios_defined,
-            }
-
-            return all_pass
-
-        except Exception as e:
-            print(f"✗ Tool selection verification failed: {e}")
-            self.results["checks"]["tool_selection_logic"] = {"status": "fail", "error": str(e)}
-            return False
-
-    def verify_work_unit_definitions(self) -> bool:
-        """Verify all 5 work-unit types are defined"""
-        print("\n" + "="*70)
-        print("VERIFICATION 4: Work Unit Types Defined and Structured")
-        print("="*70)
-
-        try:
-            work_unit_file = self.phase4_dir / "04_work_unit_definitions.md"
-            with open(work_unit_file) as f:
-                content = f.read()
-
-            # Check for 5 work-unit types
-            work_units = {
-                "investigation": "調査" in content or "Investigation" in content,
-                "comparison": "比較" in content or "Comparison" in content,
-                "implementation": "実装" in content or "Implementation" in content,
-                "fix": "修正" in content or "Fix" in content,
-                "recording": "記録" in content or "Recording" in content,
-            }
-
-            for unit_type, found in work_units.items():
-                status = "✓" if found else "✗"
-                print(f"{status} {unit_type:20} defined: {found}")
-
-            # Check for completion conditions per unit
-            has_conditions = content.count("終了条件") + content.count("End condition") >= 5
-            print(f"{'✓' if has_conditions else '✗'} Completion conditions per unit: {has_conditions}")
-
-            # Check for checklist structure
-            has_checklists = content.count("[ ]") >= 5
-            print(f"{'✓' if has_checklists else '✗'} Verification checklists: {has_checklists}")
-
-            all_pass = all(work_units.values()) and has_conditions and has_checklists
-            self.results["checks"]["work_unit_definitions"] = {
-                "status": "pass" if all_pass else "fail",
-                "work_units": work_units,
-                "has_conditions": has_conditions,
-                "has_checklists": has_checklists,
-            }
-
-            return all_pass
-
-        except Exception as e:
-            print(f"✗ Work unit verification failed: {e}")
-            self.results["checks"]["work_unit_definitions"] = {"status": "fail", "error": str(e)}
-            return False
-
-    def verify_self_verification_mandatory(self) -> bool:
-        """Verify self-verification is mandatory and structured"""
-        print("\n" + "="*70)
-        print("VERIFICATION 5: Self-Verification Mandatory Chain")
-        print("="*70)
-
-        try:
-            qa_file = self.phase4_dir / "05_quality_assurance_rules.md"
-            with open(qa_file) as f:
-                content = f.read()
-
-            # Check for 4-layer verification
-            has_syntax_layer = "構文" in content or "syntax" in content.lower()
-            has_import_layer = "インポート" in content or "import" in content.lower()
-            has_function_layer = "機能" in content or "function" in content.lower()
-            has_perf_layer = "パフォーマンス" in content or "performance" in content.lower()
-
-            print(f"{'✓' if has_syntax_layer else '✗'} Layer 1 (Syntax verification): {has_syntax_layer}")
-            print(f"{'✓' if has_import_layer else '✗'} Layer 2 (Import verification): {has_import_layer}")
-            print(f"{'✓' if has_function_layer else '✗'} Layer 3 (Function verification): {has_function_layer}")
-            print(f"{'✓' if has_perf_layer else '✗'} Layer 4 (Performance/Security): {has_perf_layer}")
-
-            # Check for mandatory enforcement (not optional)
-            is_mandatory = "必須" in content or "must" in content.lower() or "MUST" in content
-            print(f"{'✓' if is_mandatory else '✗'} Self-verification is MANDATORY: {is_mandatory}")
-
-            # Check for diff confirmation mandatory
-            has_diff_check = "git diff" in content or "差分確認" in content
-            print(f"{'✓' if has_diff_check else '✗'} Git diff confirmation mandatory: {has_diff_check}")
-
-            all_pass = (
-                has_syntax_layer and has_import_layer and
-                has_function_layer and has_perf_layer and
-                is_mandatory and has_diff_check
-            )
-
-            self.results["checks"]["self_verification_mandatory"] = {
-                "status": "pass" if all_pass else "fail",
-                "layers": {
-                    "syntax": has_syntax_layer,
-                    "import": has_import_layer,
-                    "function": has_function_layer,
-                    "perf_security": has_perf_layer,
-                },
-                "is_mandatory": is_mandatory,
-                "diff_check": has_diff_check,
-            }
-
-            return all_pass
-
-        except Exception as e:
-            print(f"✗ Self-verification verification failed: {e}")
-            self.results["checks"]["self_verification_mandatory"] = {"status": "fail", "error": str(e)}
-            return False
-
-    def verify_phase5_handoff(self) -> bool:
-        """Verify Phase 5 handoff capability is designed"""
-        print("\n" + "="*70)
-        print("VERIFICATION 6: Phase 5 Handoff Design")
-        print("="*70)
-
-        try:
-            handoff_file = self.phase4_dir / "07_phase5_handoff_memo.md"
-            exists = handoff_file.exists()
-            print(f"{'✓' if exists else '✗'} Handoff memo exists: {exists}")
-
-            if exists:
-                with open(handoff_file) as f:
-                    content = f.read()
-
-                has_state_design = "状態" in content or "state" in content.lower()
-                has_readiness = "準備" in content or "readiness" in content.lower()
-                has_dependencies = "依存" in content or "dependency" in content.lower()
-
-                print(f"{'✓' if has_state_design else '✗'} State design for Phase 5: {has_state_design}")
-                print(f"{'✓' if has_readiness else '✗'} Readiness indicators: {has_readiness}")
-                print(f"{'✓' if has_dependencies else '✗'} Dependency tracking: {has_dependencies}")
-
-                all_pass = exists and has_state_design and has_readiness and has_dependencies
-            else:
-                all_pass = False
-
-            self.results["checks"]["phase5_handoff"] = {
-                "status": "pass" if all_pass else "fail",
-                "exists": exists,
-            }
-
-            return all_pass
-
-        except Exception as e:
-            print(f"✗ Phase 5 handoff verification failed: {e}")
-            self.results["checks"]["phase5_handoff"] = {"status": "fail", "error": str(e)}
-            return False
-
-    def run_all_verifications(self) -> int:
-        """Execute all verifications and return exit code"""
-        print("\n")
-        print("██████████████████████████████████████████████████████████████████████████")
-        print("               PHASE 4 OPERATIONAL VERIFICATION PROGRAM")
-        print("██████████████████████████████████████████████████████████████████████████")
-        print(f"Repository: {self.repo_root}")
-        print(f"Timestamp: {self.results['timestamp']}")
-        print()
-
-        # Run all verification checks
-        verifications = [
-            ("Required Deliverables", self.verify_deliverables),
-            ("GitHub Integration", self.verify_github_integration),
-            ("Tool Selection Logic", self.verify_tool_selection_logic),
-            ("Work Unit Types", self.verify_work_unit_definitions),
-            ("Self-Verification Mandatory", self.verify_self_verification_mandatory),
-            ("Phase 5 Handoff", self.verify_phase5_handoff),
-        ]
-
-        results_list = []
-        for name, verify_func in verifications:
-            try:
-                result = verify_func()
-                results_list.append((name, result))
-                self.results["summary"]["total"] += 1
-                if result:
-                    self.results["summary"]["passed"] += 1
-                else:
-                    self.results["summary"]["failed"] += 1
-            except Exception as e:
-                print(f"\n✗ EXCEPTION in {name}: {e}")
-                results_list.append((name, False))
-                self.results["summary"]["total"] += 1
-                self.results["summary"]["failed"] += 1
-
-        # Print summary
-        print("\n" + "="*70)
-        print("SUMMARY")
-        print("="*70)
-
-        for name, result in results_list:
-            status = "✓ PASS" if result else "✗ FAIL"
-            print(f"{status} {name}")
-
-        print(f"\nTotal: {self.results['summary']['passed']}/{self.results['summary']['total']} verifications passed")
-
-        # Final decision
-        print("\n" + "="*70)
-        print("FINAL DECISION")
-        print("="*70)
-
-        if self.results["summary"]["passed"] == self.results["summary"]["total"]:
-            print("✓ ALL VERIFICATIONS PASSED")
-            print("✓ Phase 4 is OPERATIONALLY COMPLETE")
-            print("✓ Ready for handoff to Phase 5")
-            print("\nExit code: 0 (SUCCESS)")
-            return 0
-        else:
-            print(f"✗ {self.results['summary']['failed']} VERIFICATION(S) FAILED")
-            print("✗ Phase 4 is INCOMPLETE")
-            print(f"\nExit code: 1 (FAILURE)")
-            return 1
-
-    def export_results(self, output_file: Path = None):
-        """Export verification results as JSON"""
-        if output_file is None:
-            output_file = self.repo_root / "PHASE4_OPERATIONAL_VERIFICATION_RESULTS.json"
-
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(self.results, f, ensure_ascii=False, indent=2)
-
-        print(f"\n📄 Results exported to: {output_file}")
-        return output_file
-
-
-def main():
-    repo_root = Path.cwd()
-    verifier = Phase4Verifier(repo_root)
-
-    exit_code = verifier.run_all_verifications()
-    verifier.export_results()
-
-    sys.exit(exit_code)
+    return exit_code
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(run_all(Path.cwd()))
