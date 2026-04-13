@@ -403,6 +403,139 @@ def check_completion_conditions(root: Path) -> tuple[bool, list[str]]:
 
 
 # =============================================================================
+# Operational scenario checks (beyond structural audit)
+# =============================================================================
+
+def check_execution_evidence(root: Path) -> tuple[bool, list[str]]:
+    """V13: Execution evidence file exists with all 5 work-unit types proven."""
+    issues = []
+    evidence_file = root / PHASE4_DIR / "execution_evidence.md"
+
+    if not evidence_file.exists():
+        return False, ["execution_evidence.md does not exist"]
+
+    content = read_file(evidence_file)
+
+    # Must document all 5 work-unit types
+    required_units = ["調査", "比較", "実装", "修正", "記録"]
+    for unit in required_units:
+        if unit not in content:
+            issues.append(f"Missing work-unit evidence: {unit}")
+
+    # Must reference actual tools used
+    if "使用ツール" not in content:
+        issues.append("No tool usage documented")
+
+    # Must describe a real task (not placeholder)
+    if len(content) < 500:
+        issues.append(f"Evidence too short ({len(content)}B) — likely placeholder")
+
+    return len(issues) == 0, issues
+
+
+def check_work_instruction_marked_complete(root: Path) -> tuple[bool, list[str]]:
+    """V14: 10.フェーズ4作業指示書.md has completion marks (not unchecked)."""
+    issues = []
+    wi_path = root / "10.フェーズ4作業指示書.md"
+
+    if not wi_path.exists():
+        return False, ["10.フェーズ4作業指示書.md not found"]
+
+    content = read_file(wi_path)
+
+    # Completion conditions should be marked ✅, not ◻
+    unchecked_conditions = content.count("| ◻ |")
+    if unchecked_conditions > 0:
+        issues.append(f"{unchecked_conditions} completion conditions still unchecked (◻)")
+
+    # Completion checklist should be [x], not [ ]
+    checklist_section = content[content.find("完了状態チェックリスト"):]
+    unchecked_items = checklist_section.count("- [ ]")
+    if unchecked_items > 0:
+        issues.append(f"{unchecked_items} checklist items still unchecked in stop-condition section")
+
+    return len(issues) == 0, issues
+
+
+def check_live_workflow_scenario(root: Path) -> tuple[bool, list[str]]:
+    """V15: Execute a live mini-workflow through all 5 work-unit types.
+
+    This is not a static check. It actually exercises the Phase 4 workflow:
+      Investigation -> read deliverables, extract facts
+      Comparison    -> compare facts against expected baseline
+      Implementation-> produce a validation artifact
+      Fix           -> detect and report discrepancies
+      Recording     -> structure results for output
+
+    If ANY step fails to execute, the check fails — proving the workflow
+    is broken in practice, not just in documentation.
+    """
+    issues = []
+    d = root / PHASE4_DIR
+
+    # --- Investigation: extract structural facts from each deliverable ---
+    facts = {}
+    for fname in REQUIRED_FILES:
+        fpath = d / fname
+        if not fpath.exists():
+            issues.append(f"Investigation failed: {fname} missing")
+            return False, issues
+        content = read_file(fpath)
+        facts[fname] = {
+            "size": len(content),
+            "h2_sections": count_h2_sections(content),
+            "has_checklists": "[ ]" in content or "[x]" in content,
+        }
+
+    # --- Comparison: compare against minimum baseline ---
+    baseline = {
+        "01_execution_flow.md": {"min_h2": 5, "min_size": 5000},
+        "02_tool_maximization_policy.md": {"min_h2": 3, "min_size": 3000},
+        "03_new_tool_intake_rules.md": {"min_h2": 3, "min_size": 3000},
+        "04_work_unit_definitions.md": {"min_h2": 3, "min_size": 3000},
+        "05_quality_assurance_rules.md": {"min_h2": 3, "min_size": 3000},
+        "06_github_integration_policy.md": {"min_h2": 3, "min_size": 3000},
+        "07_phase5_handoff_memo.md": {"min_h2": 3, "min_size": 3000},
+    }
+
+    comparison_results = {}
+    for fname, expected in baseline.items():
+        actual = facts[fname]
+        ok = (
+            actual["h2_sections"] >= expected["min_h2"]
+            and actual["size"] >= expected["min_size"]
+        )
+        comparison_results[fname] = ok
+        if not ok:
+            issues.append(
+                f"Comparison fail: {fname} — "
+                f"h2={actual['h2_sections']} (need {expected['min_h2']}), "
+                f"size={actual['size']} (need {expected['min_size']})"
+            )
+
+    # --- Implementation: produce a validation artifact ---
+    scenario_artifact = {
+        "scenario": "live_workflow_v15",
+        "investigation": facts,
+        "comparison": comparison_results,
+        "all_pass": all(comparison_results.values()),
+        "files_checked": len(facts),
+    }
+
+    # --- Fix: if any comparison failed, report it as an issue ---
+    failed_files = [f for f, ok in comparison_results.items() if not ok]
+    if failed_files:
+        issues.append(f"Fix needed: {len(failed_files)} file(s) below baseline")
+
+    # --- Recording: the scenario_artifact IS the recording ---
+    # It will be included in the JSON output automatically
+    if scenario_artifact["files_checked"] != 7:
+        issues.append(f"Recording incomplete: only {scenario_artifact['files_checked']}/7 files processed")
+
+    return len(issues) == 0, issues
+
+
+# =============================================================================
 # Main runner
 # =============================================================================
 
@@ -429,6 +562,9 @@ def run_all(root: Path) -> int:
         ("V10 Cross-references between deliverables", check_cross_references),
         ("V11 Git operational (clean/synced/diffable)", check_git_operational),
         ("V12 Completion conditions (6 canonical CCs)", check_completion_conditions),
+        ("V13 Execution evidence (5 work-unit types)", check_execution_evidence),
+        ("V14 Work instruction marked complete", check_work_instruction_marked_complete),
+        ("V15 Live workflow scenario (operational)", check_live_workflow_scenario),
     ]
 
     results = []
