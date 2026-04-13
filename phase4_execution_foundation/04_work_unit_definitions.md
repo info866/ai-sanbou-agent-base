@@ -315,16 +315,3 @@
 [次に何をするか]
 ```
 
----
-
-## 次の成果物
-
-このファイル（作業単位定義）をベースに、以下を順に作成：
-
-1. ✅ 01_execution_flow.md
-2. ✅ 02_tool_maximization_policy.md
-3. ✅ 03_new_tool_intake_rules.md
-4. ✅ 04_work_unit_definitions.md
-5. ⬜ 05_quality_assurance_rules.md
-6. ⬜ 06_github_integration_policy.md
-7. ⬜ 07_phase5_handoff_memo.md
