@@ -167,8 +167,24 @@ class Phase4OperationalVerification:
             print("✅ 5作業単位全て定義済み")
 
         # 各単位が実行フロー・終了条件を持つか
+        import re
         for unit in units:
-            if f"実行フロー" not in unit_content.split(unit)[1].split("##")[0]:
+            # Split by unit name, then find content up to next level-2 markdown header
+            parts = unit_content.split(unit)
+            if len(parts) < 2:
+                print(f"⚠️  {unit}: セクションが見つかりません")
+                self.failures.append(f"{unit}: セクションが見つかりません")
+                return False
+
+            after_unit = parts[1]
+            # Find next "## " (level 2 markdown header) at line start
+            next_header_match = re.search(r'\n## ', after_unit)
+            if next_header_match:
+                unit_section = after_unit[:next_header_match.start()]
+            else:
+                unit_section = after_unit
+
+            if "実行フロー" not in unit_section:
                 print(f"⚠️  {unit}: 実行フロー定義が不完全")
                 self.failures.append(f"{unit}: 実行フロー定義が不完全")
                 return False
