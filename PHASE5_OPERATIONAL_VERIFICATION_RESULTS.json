@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-04-13T13:45:51.801482",
+  "tests": [
+    {
+      "name": "Phase 5 deliverable existence",
+      "pass": true,
+      "checks": 7,
+      "passed": 7
+    },
+    {
+      "name": "Request classification (6 classes)",
+      "pass": true,
+      "checks": 6,
+      "passed": 6
+    },
+    {
+      "name": "Capability selection (6 classes)",
+      "pass": true,
+      "checks": 6,
+      "passed": 6
+    },
+    {
+      "name": "Reason generation (3 elements)",
+      "pass": true,
+      "checks": 3,
+      "passed": 3
+    },
+    {
+      "name": "Reconfirmation judgment (T4 detection)",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
+    },
+    {
+      "name": "Execution handoff (5 elements)",
+      "pass": true,
+      "checks": 4,
+      "passed": 4
+    },
+    {
+      "name": "Update absorption (new + obsolescence)",
+      "pass": true,
+      "checks": 5,
+      "passed": 5
+    },
+    {
+      "name": "End-to-end pipeline (3 requests)",
+      "pass": true,
+      "checks": 3,
+      "passed": 3
+    },
+    {
+      "name": "Phase 4 integration check",
+      "pass": true,
+      "checks": 7,
+      "passed": 7
+    }
+  ],
+  "all_pass": true,
+  "total_checks": 42,
+  "passed_checks": 42
+}
