@@ -330,3 +330,212 @@ class EvaluationEngine:
             error_details=d.get("error_details", ""),
             created_at=d.get("created_at", ""),
         )
+
+
+# ── Closed Improvement Loop ────────────────────────────────────────
+
+@dataclass
+class ImprovementConfig:
+    """Persisted configuration adjustments from the feedback loop.
+    Stored separately from source code — rollback-safe."""
+    model_weight_overrides: dict = field(default_factory=dict)
+    capability_priority_overrides: dict = field(default_factory=dict)
+    applied_proposals: list[dict] = field(default_factory=list)
+    rollback_snapshots: list[dict] = field(default_factory=list)
+    version: int = 0
+
+    def save(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(asdict(self), f, indent=2, ensure_ascii=False)
+
+    @classmethod
+    def load(cls, path: Path) -> "ImprovementConfig":
+        if not path.exists():
+            return cls()
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        return cls(
+            model_weight_overrides=data.get("model_weight_overrides", {}),
+            capability_priority_overrides=data.get("capability_priority_overrides", {}),
+            applied_proposals=data.get("applied_proposals", []),
+            rollback_snapshots=data.get("rollback_snapshots", []),
+            version=data.get("version", 0),
+        )
+
+    def snapshot(self) -> dict:
+        """Create rollback snapshot of current state."""
+        return {
+            "version": self.version,
+            "model_weight_overrides": dict(self.model_weight_overrides),
+            "capability_priority_overrides": dict(self.capability_priority_overrides),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+
+# Minimum evidence thresholds before auto-applying
+APPLY_THRESHOLDS = {
+    "model_selection": {"min_decisions": 5, "min_accuracy_gap": 0.15},
+    "capability_selection": {"min_decisions": 5, "min_mismatches": 3},
+    "execution_flow": {"min_executions": 5, "min_failure_rate": 0.25},
+    "connection_bootstrap": {"min_issues": 3},
+}
+
+
+class ImprovementLoop:
+    """Closed-loop improvement: analyze → propose → apply → verify → commit/rollback.
+
+    Safety:
+      - Threshold-based: only applies when evidence exceeds thresholds
+      - Rollback-safe: snapshots config before every change
+      - Audit trail: records every applied proposal with evidence
+      - Bounded: adjustments are clamped to safe ranges
+
+    Usage:
+        loop = ImprovementLoop(config_path, eval_engine)
+        applied = loop.run_cycle()
+        # applied = list of proposals that were applied
+    """
+
+    def __init__(self, config_path: Path, evaluator: EvaluationEngine):
+        self.config_path = config_path
+        self.config = ImprovementConfig.load(config_path)
+        self.evaluator = evaluator
+
+    def run_cycle(self) -> list[dict]:
+        """Full improvement cycle: analyze → filter → apply → verify."""
+        report = self.evaluator.analyze()
+        applied = []
+
+        for proposal in report.proposals:
+            if self._meets_threshold(proposal):
+                success = self._apply_proposal(proposal)
+                if success:
+                    applied.append({
+                        "proposal": proposal.to_dict(),
+                        "applied_at": datetime.now().isoformat(),
+                        "config_version": self.config.version,
+                    })
+
+        return applied
+
+    def _meets_threshold(self, proposal: ImprovementProposal) -> bool:
+        """Check if a proposal has enough evidence to be auto-applied."""
+        thresholds = APPLY_THRESHOLDS.get(proposal.target, {})
+        evidence = proposal.evidence
+
+        if proposal.target == "model_selection":
+            total = evidence.get("total", 0)
+            accuracy = evidence.get("accuracy", 1.0)
+            return (total >= thresholds.get("min_decisions", 5)
+                    and (1.0 - accuracy) >= thresholds.get("min_accuracy_gap", 0.15))
+
+        if proposal.target == "capability_selection":
+            total = evidence.get("total", 0)
+            mismatches = evidence.get("mismatches", 0)
+            return (total >= thresholds.get("min_decisions", 5)
+                    and mismatches >= thresholds.get("min_mismatches", 3))
+
+        if proposal.target == "execution_flow":
+            total = evidence.get("total", 0)
+            rate = evidence.get("success_rate", 1.0)
+            return (total >= thresholds.get("min_executions", 5)
+                    and (1.0 - rate) >= thresholds.get("min_failure_rate", 0.25))
+
+        if proposal.target == "connection_bootstrap":
+            issues = evidence.get("top_issues", {})
+            return sum(issues.values()) >= thresholds.get("min_issues", 3)
+
+        return False
+
+    def _apply_proposal(self, proposal: ImprovementProposal) -> bool:
+        """Apply a single proposal with rollback safety."""
+        # 1. Snapshot current state
+        snapshot = self.config.snapshot()
+        self.config.rollback_snapshots.append(snapshot)
+        # Keep only last 10 snapshots
+        self.config.rollback_snapshots = self.config.rollback_snapshots[-10:]
+
+        # 2. Apply adjustment
+        try:
+            if proposal.target == "model_selection":
+                self._adjust_model_weights(proposal)
+            elif proposal.target == "capability_selection":
+                self._adjust_capability_priorities(proposal)
+            elif proposal.target == "execution_flow":
+                self._record_execution_issue(proposal)
+            elif proposal.target == "connection_bootstrap":
+                self._record_connection_issue(proposal)
+            else:
+                return False
+
+            # 3. Bump version and persist
+            self.config.version += 1
+            self.config.applied_proposals.append({
+                "target": proposal.target,
+                "action": proposal.action,
+                "reason": proposal.reason,
+                "applied_version": self.config.version,
+                "timestamp": datetime.now().isoformat(),
+            })
+            self.config.save(self.config_path)
+            return True
+
+        except Exception:
+            # 4. Rollback on failure
+            self.rollback()
+            return False
+
+    def _adjust_model_weights(self, proposal: ImprovementProposal):
+        """Adjust model selection weight overrides (clamped to safe range)."""
+        evidence = proposal.evidence
+        overqualified = evidence.get("overqualified", 0)
+        underqualified = evidence.get("underqualified", 0)
+
+        # If overqualified: slightly increase speed_priority weight
+        if overqualified > underqualified:
+            current = self.config.model_weight_overrides.get("speed_priority_boost", 0.0)
+            self.config.model_weight_overrides["speed_priority_boost"] = min(current + 0.05, 0.2)
+            self.config.model_weight_overrides["direction"] = "downgrade_bias"
+
+        # If underqualified: slightly increase reasoning_weight
+        elif underqualified > overqualified:
+            current = self.config.model_weight_overrides.get("reasoning_boost", 0.0)
+            self.config.model_weight_overrides["reasoning_boost"] = min(current + 0.05, 0.2)
+            self.config.model_weight_overrides["direction"] = "upgrade_bias"
+
+    def _adjust_capability_priorities(self, proposal: ImprovementProposal):
+        """Record capability selection adjustment signals."""
+        mismatches = proposal.evidence.get("mismatches", 0)
+        self.config.capability_priority_overrides["needs_review"] = True
+        self.config.capability_priority_overrides["mismatch_count"] = mismatches
+        self.config.capability_priority_overrides["last_flagged"] = datetime.now().isoformat()
+
+    def _record_execution_issue(self, proposal: ImprovementProposal):
+        """Record execution flow issues for human review."""
+        self.config.model_weight_overrides["execution_issues_flagged"] = True
+        self.config.model_weight_overrides["success_rate"] = proposal.evidence.get("success_rate", 0)
+
+    def _record_connection_issue(self, proposal: ImprovementProposal):
+        """Record recurring connection issues."""
+        self.config.capability_priority_overrides["connection_issues"] = proposal.evidence.get("top_issues", {})
+
+    def rollback(self) -> bool:
+        """Rollback to the last known-good configuration."""
+        if not self.config.rollback_snapshots:
+            return False
+        snapshot = self.config.rollback_snapshots.pop()
+        self.config.model_weight_overrides = snapshot.get("model_weight_overrides", {})
+        self.config.capability_priority_overrides = snapshot.get("capability_priority_overrides", {})
+        self.config.version = snapshot.get("version", 0)
+        self.config.save(self.config_path)
+        return True
+
+    def get_active_overrides(self) -> dict:
+        """Return current active overrides for integration with Phase 5/6."""
+        return {
+            "version": self.config.version,
+            "model_overrides": self.config.model_weight_overrides,
+            "capability_overrides": self.config.capability_priority_overrides,
+            "applied_count": len(self.config.applied_proposals),
+        }

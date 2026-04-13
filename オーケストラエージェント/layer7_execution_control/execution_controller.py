@@ -3,21 +3,26 @@
 Layer 7: Execution Control (実行制御層)
 =======================================
 Takes Phase 5 execution handoff → produces auto-executable action plan.
-No manual slash commands. AI fires everything.
+Then EXECUTES the plan: bash via subprocess, file ops via pathlib,
+runtime-dependent actions deferred and reported.
 
-goal: AI auto-selects and auto-fires slash commands, subagents, hooks, tools
+goal: AI auto-selects, auto-fires, and tracks execution results
 inputs: Phase 5 handoff (5-element structure)
-core_logic: Capability→Action mapping + Step→Tool sequencing
+core_logic: Capability→Action mapping + Step→Tool sequencing + real dispatch
 activation_rule: Every Phase 5 handoff triggers this layer
-verification: Plan completeness, action validity, ordering correctness
-handoff: ExecutionPlan → Layer 8 (quality gate injection point)
+verification: Plan completeness, action validity, execution results
+handoff: ExecutionPlan + ExecutionResult → Layer 8/11
 """
 
 from __future__ import annotations
 
+import subprocess
+import fnmatch
+import re
 from dataclasses import dataclass, field, asdict
 from typing import Literal, Optional
 from datetime import datetime
+from pathlib import Path
 
 
 # ── Action Types ────────────────────────────────────────────────────
@@ -283,3 +288,353 @@ class ExecutionController:
                 cap_tag = f"[{a.capability_id}]" if a.capability_id else "[default]"
                 lines.append(f"    {a.order}. {cap_tag} {a.action_type}:{a.target} — {a.description}")
         return "\n".join(lines)
+
+
+# ── Action Dispatch & Execution ─────────────────────────────────────
+
+@dataclass
+class ActionResult:
+    """Result of executing a single action."""
+    order: int
+    action_type: str
+    target: str
+    status: Literal["success", "failed", "skipped", "deferred"] = "skipped"
+    output: str = ""
+    error: str = ""
+    duration_ms: float = 0.0
+    deferred_reason: str = ""
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class ExecutionResult:
+    """Aggregated result of executing a full plan."""
+    plan_classification: str = ""
+    model_used: str = ""
+    total_actions: int = 0
+    executed: int = 0
+    succeeded: int = 0
+    failed: int = 0
+    skipped: int = 0
+    deferred: int = 0
+    results: list[ActionResult] = field(default_factory=list)
+    halted_at: int = -1  # order index where execution stopped, -1 = completed
+    started_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    finished_at: str = ""
+
+    @property
+    def outcome(self) -> Literal["success", "partial", "failure"]:
+        if self.failed == 0 and self.executed > 0:
+            return "success"
+        if self.succeeded > 0:
+            return "partial"
+        return "failure"
+
+    def to_dict(self) -> dict:
+        d = asdict(self)
+        d["outcome"] = self.outcome
+        return d
+
+
+# Actions that require Claude Code runtime — cannot be dispatched locally
+RUNTIME_ONLY_TYPES = {"subagent", "slash_command", "hook", "tool"}
+
+# Paid/auth-gated targets that must never be auto-activated
+PAID_EXCLUSIONS = {
+    "anthropic", "openai", "ANTHROPIC_API_KEY", "OPENAI_API_KEY",
+}
+
+# Bash commands considered safe for auto-execution
+SAFE_BASH_PREFIXES = [
+    "python3 ", "python ", "git status", "git log", "git diff", "git branch",
+    "ls ", "cat ", "head ", "tail ", "wc ", "sort ", "uniq ",
+    "grep ", "find ", "which ", "echo ", "date", "pwd", "whoami",
+    "pip show", "pip list", "pip index", "npm list", "npm view",
+    "gh api", "gh repo view", "gh pr list", "gh issue list",
+    "quality_gate_",  # Layer 8 gate actions
+]
+
+
+class ActionDispatcher:
+    """Executes actions from an ExecutionPlan.
+
+    Safely dispatches:
+      - bash: subprocess.run() for safe commands only
+      - read: pathlib read_text()
+      - grep: regex search in files
+      - glob: pathlib glob
+      - write/edit: pathlib write (only within project)
+
+    Defers (reports but does not run):
+      - subagent, slash_command, hook, tool: require Claude Code runtime
+      - Paid API/MCP targets: safety exclusion
+
+    Usage:
+        dispatcher = ActionDispatcher(project_root=Path("."))
+        result = dispatcher.execute(plan)
+    """
+
+    def __init__(self, project_root: Path | None = None, dry_run: bool = False):
+        self.project_root = (project_root or Path.cwd()).resolve()
+        self.dry_run = dry_run
+
+    def execute(self, plan: ExecutionPlan, halt_on_gate_fail: bool = True) -> ExecutionResult:
+        """Execute all actions in order. Halt if a quality gate fails."""
+        result = ExecutionResult(
+            plan_classification=plan.classification,
+            model_used=plan.model,
+            total_actions=plan.action_count,
+        )
+
+        for action in sorted(plan.actions, key=lambda a: a.order):
+            ar = self._dispatch(action)
+            result.results.append(ar)
+
+            if ar.status == "success":
+                result.executed += 1
+                result.succeeded += 1
+            elif ar.status == "failed":
+                result.executed += 1
+                result.failed += 1
+                if halt_on_gate_fail and action.gate_before:
+                    result.halted_at = action.order
+                    break
+            elif ar.status == "deferred":
+                result.deferred += 1
+            else:
+                result.skipped += 1
+
+        result.finished_at = datetime.now().isoformat()
+        return result
+
+    def _dispatch(self, action: ExecutionAction) -> ActionResult:
+        """Route a single action to its handler."""
+        start = datetime.now()
+
+        # 1. Runtime-only → defer
+        if action.action_type in RUNTIME_ONLY_TYPES:
+            return ActionResult(
+                order=action.order, action_type=action.action_type,
+                target=action.target, status="deferred",
+                deferred_reason=f"{action.action_type} requires Claude Code runtime",
+            )
+
+        # 2. Paid exclusion check
+        if self._is_paid_target(action):
+            return ActionResult(
+                order=action.order, action_type=action.action_type,
+                target=action.target, status="skipped",
+                deferred_reason="Paid API/MCP target excluded for safety",
+            )
+
+        # 3. Dispatch by type
+        handlers = {
+            "bash": self._exec_bash,
+            "read": self._exec_read,
+            "write": self._exec_write,
+            "edit": self._exec_edit,
+            "grep": self._exec_grep,
+            "glob": self._exec_glob,
+        }
+        handler = handlers.get(action.action_type)
+        if not handler:
+            return ActionResult(
+                order=action.order, action_type=action.action_type,
+                target=action.target, status="skipped",
+                deferred_reason=f"No handler for type '{action.action_type}'",
+            )
+
+        try:
+            ar = handler(action)
+        except Exception as e:
+            ar = ActionResult(
+                order=action.order, action_type=action.action_type,
+                target=action.target, status="failed", error=str(e),
+            )
+
+        ar.duration_ms = (datetime.now() - start).total_seconds() * 1000
+        return ar
+
+    def _is_paid_target(self, action: ExecutionAction) -> bool:
+        combined = f"{action.target} {str(action.params)} {action.description}".lower()
+        return any(p.lower() in combined for p in PAID_EXCLUSIONS)
+
+    def _is_safe_bash(self, cmd: str) -> bool:
+        cmd_stripped = cmd.strip()
+        return any(cmd_stripped.startswith(p) for p in SAFE_BASH_PREFIXES)
+
+    def _exec_bash(self, action: ExecutionAction) -> ActionResult:
+        cmd = action.target
+        if action.params.get("args"):
+            cmd = f"{cmd} {action.params['args']}"
+
+        if self.dry_run or not self._is_safe_bash(cmd):
+            return ActionResult(
+                order=action.order, action_type="bash", target=cmd,
+                status="deferred" if not self._is_safe_bash(cmd) else "skipped",
+                deferred_reason=f"Unsafe or dry-run: '{cmd}'",
+                output=f"[dry-run] would execute: {cmd}" if self.dry_run else "",
+            )
+
+        try:
+            r = subprocess.run(
+                cmd, shell=True, capture_output=True, text=True,
+                timeout=30, cwd=str(self.project_root),
+            )
+            # Capture head + tail to ensure summary lines at end are visible
+            stdout = r.stdout
+            if len(stdout) > 4000:
+                stdout = stdout[:1500] + "\n...(truncated)...\n" + stdout[-1500:]
+            return ActionResult(
+                order=action.order, action_type="bash", target=cmd,
+                status="success" if r.returncode == 0 else "failed",
+                output=stdout,
+                error=r.stderr[:1000] if r.returncode != 0 else "",
+            )
+        except subprocess.TimeoutExpired:
+            return ActionResult(
+                order=action.order, action_type="bash", target=cmd,
+                status="failed", error="Timeout (30s)",
+            )
+
+    def _exec_read(self, action: ExecutionAction) -> ActionResult:
+        target = action.params.get("path") or action.target
+        path = self._safe_path(target)
+        if not path:
+            return ActionResult(
+                order=action.order, action_type="read", target=target,
+                status="deferred", deferred_reason="Path outside project or not found",
+            )
+        try:
+            content = path.read_text(encoding="utf-8")
+            return ActionResult(
+                order=action.order, action_type="read", target=str(path),
+                status="success", output=f"Read {len(content)} chars from {path.name}",
+            )
+        except Exception as e:
+            return ActionResult(
+                order=action.order, action_type="read", target=str(path),
+                status="failed", error=str(e),
+            )
+
+    def _exec_write(self, action: ExecutionAction) -> ActionResult:
+        target = action.params.get("path") or action.target
+        content = action.params.get("content", "")
+        if self.dry_run:
+            return ActionResult(
+                order=action.order, action_type="write", target=target,
+                status="skipped", deferred_reason="Dry-run: write skipped",
+            )
+        path = self._safe_path(target, must_exist=False)
+        if not path:
+            return ActionResult(
+                order=action.order, action_type="write", target=target,
+                status="deferred", deferred_reason="Path outside project",
+            )
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+            return ActionResult(
+                order=action.order, action_type="write", target=str(path),
+                status="success", output=f"Wrote {len(content)} chars to {path.name}",
+            )
+        except Exception as e:
+            return ActionResult(
+                order=action.order, action_type="write", target=str(path),
+                status="failed", error=str(e),
+            )
+
+    def _exec_edit(self, action: ExecutionAction) -> ActionResult:
+        target = action.params.get("path") or action.target
+        old = action.params.get("old_string", "")
+        new = action.params.get("new_string", "")
+        if self.dry_run or not old:
+            return ActionResult(
+                order=action.order, action_type="edit", target=target,
+                status="skipped", deferred_reason="Dry-run or no edit spec",
+            )
+        path = self._safe_path(target)
+        if not path:
+            return ActionResult(
+                order=action.order, action_type="edit", target=target,
+                status="deferred", deferred_reason="Path outside project or not found",
+            )
+        try:
+            content = path.read_text(encoding="utf-8")
+            if old not in content:
+                return ActionResult(
+                    order=action.order, action_type="edit", target=str(path),
+                    status="failed", error="old_string not found in file",
+                )
+            path.write_text(content.replace(old, new, 1), encoding="utf-8")
+            return ActionResult(
+                order=action.order, action_type="edit", target=str(path),
+                status="success", output=f"Edited {path.name}",
+            )
+        except Exception as e:
+            return ActionResult(
+                order=action.order, action_type="edit", target=str(path),
+                status="failed", error=str(e),
+            )
+
+    def _exec_grep(self, action: ExecutionAction) -> ActionResult:
+        pattern = action.params.get("pattern") or action.target
+        search_path = self._safe_path(action.params.get("path", "."), must_exist=True)
+        if not search_path:
+            search_path = self.project_root
+        try:
+            matches = []
+            target_files = search_path.rglob("*.py") if search_path.is_dir() else [search_path]
+            for f in target_files:
+                try:
+                    text = f.read_text(encoding="utf-8", errors="ignore")
+                    for i, line in enumerate(text.splitlines(), 1):
+                        if re.search(pattern, line):
+                            matches.append(f"{f.name}:{i}: {line.strip()[:100]}")
+                            if len(matches) >= 50:
+                                break
+                except (OSError, UnicodeDecodeError):
+                    pass
+                if len(matches) >= 50:
+                    break
+            return ActionResult(
+                order=action.order, action_type="grep", target=pattern,
+                status="success", output=f"{len(matches)} matches\n" + "\n".join(matches[:20]),
+            )
+        except Exception as e:
+            return ActionResult(
+                order=action.order, action_type="grep", target=pattern,
+                status="failed", error=str(e),
+            )
+
+    def _exec_glob(self, action: ExecutionAction) -> ActionResult:
+        pattern = action.params.get("pattern") or action.target
+        try:
+            matches = sorted(self.project_root.glob(pattern))[:100]
+            names = [str(m.relative_to(self.project_root)) for m in matches]
+            return ActionResult(
+                order=action.order, action_type="glob", target=pattern,
+                status="success", output=f"{len(matches)} files\n" + "\n".join(names[:30]),
+            )
+        except Exception as e:
+            return ActionResult(
+                order=action.order, action_type="glob", target=pattern,
+                status="failed", error=str(e),
+            )
+
+    def _safe_path(self, target: str, must_exist: bool = True) -> Optional[Path]:
+        """Resolve path within project boundary."""
+        try:
+            p = Path(target)
+            if not p.is_absolute():
+                p = self.project_root / p
+            p = p.resolve()
+            if not str(p).startswith(str(self.project_root)):
+                return None
+            if must_exist and not p.exists():
+                return None
+            return p
+        except (ValueError, OSError):
+            return None

@@ -313,3 +313,159 @@ class ConnectionBootstrap:
     def _check_unknown(self, req: ConnectionRequirement) -> ConnectionHealth:
         return ConnectionHealth(req, "degraded",
                                 f"No checker for type '{req.conn_type}'")
+
+    # ── Safe Auto-Preparation ────────────────────────────────────────
+
+    def prepare(self, requirements: list[ConnectionRequirement]) -> PrepareReport:
+        """Check all, then auto-prepare SAFE missing connections.
+
+        Safety rules:
+          - NEVER auto-install paid APIs or auth-gated services
+          - NEVER auto-connect paid MCPs
+          - Only auto-install free Python packages via pip
+          - Only auto-create local config files
+          - Skip anything requiring interactive login
+        """
+        check_report = self.check_all(requirements)
+        prep = PrepareReport(check_report=check_report)
+
+        for health in check_report.results:
+            if health.is_ok:
+                continue  # already working
+
+            req = health.requirement
+            action = self._try_prepare(req, health)
+            prep.actions_taken.append(action)
+            if action["status"] == "fixed":
+                prep.fixed += 1
+            elif action["status"] == "skipped_paid":
+                prep.skipped_paid += 1
+            elif action["status"] == "skipped_interactive":
+                prep.skipped_interactive += 1
+            else:
+                prep.could_not_fix += 1
+
+        # Re-check after preparation
+        if prep.fixed > 0:
+            prep.recheck_report = self.check_all(requirements)
+
+        return prep
+
+    def _try_prepare(self, req: ConnectionRequirement, health: ConnectionHealth) -> dict:
+        """Attempt safe auto-preparation for a single missing connection."""
+        action = {
+            "name": req.name, "type": req.conn_type,
+            "target": req.target, "status": "no_action",
+            "detail": "",
+        }
+
+        # SAFETY: Never auto-activate paid APIs
+        if req.conn_type == "api":
+            action["status"] = "skipped_paid"
+            action["detail"] = "Paid API key — requires manual setup"
+            return action
+
+        # SAFETY: Never auto-connect paid MCPs
+        if req.conn_type == "mcp":
+            action["status"] = "skipped_paid"
+            action["detail"] = "MCP server — may incur costs, requires manual config"
+            return action
+
+        # SAFETY: Never auto-login
+        if req.conn_type == "github" and health.status != "healthy":
+            action["status"] = "skipped_interactive"
+            action["detail"] = "GitHub auth requires interactive login (gh auth login)"
+            return action
+
+        # Safe: auto-install Python module
+        if req.conn_type == "python_module" and health.status == "missing":
+            return self._pip_install(req, action)
+
+        # Safe: create local config file if template available
+        if req.conn_type == "env_var" and health.status == "missing":
+            return self._create_config(req, action)
+
+        action["status"] = "could_not_fix"
+        action["detail"] = f"No safe auto-fix for {req.conn_type}:{req.target}"
+        return action
+
+    def _pip_install(self, req: ConnectionRequirement, action: dict) -> dict:
+        """Safely install a Python package."""
+        # Safety: only allow known safe packages
+        SAFE_PACKAGES = {"anthropic", "httpx", "pydantic", "requests", "pytest"}
+        pkg = req.target
+        if pkg not in SAFE_PACKAGES:
+            action["status"] = "skipped_paid"
+            action["detail"] = f"Package '{pkg}' not in safe-install list"
+            return action
+
+        try:
+            r = subprocess.run(
+                ["pip", "install", "--quiet", pkg],
+                capture_output=True, text=True, timeout=60,
+            )
+            if r.returncode == 0:
+                action["status"] = "fixed"
+                action["detail"] = f"pip install {pkg} succeeded"
+            else:
+                action["status"] = "could_not_fix"
+                action["detail"] = f"pip install {pkg} failed: {r.stderr[:200]}"
+        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+            action["status"] = "could_not_fix"
+            action["detail"] = str(e)
+        return action
+
+    def _create_config(self, req: ConnectionRequirement, action: dict) -> dict:
+        """Create a local config file if it's a known pattern."""
+        target_path = self.project_root / req.target
+        if target_path.exists():
+            action["status"] = "fixed"
+            action["detail"] = f"File already exists: {req.target}"
+            return action
+
+        # Only create .claude/settings.json with safe defaults
+        if req.target == ".claude/settings.json":
+            try:
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                target_path.write_text(json.dumps(
+                    {"permissions": {}, "mcpServers": {}}, indent=2,
+                ))
+                action["status"] = "fixed"
+                action["detail"] = "Created default .claude/settings.json"
+            except OSError as e:
+                action["status"] = "could_not_fix"
+                action["detail"] = str(e)
+            return action
+
+        action["status"] = "could_not_fix"
+        action["detail"] = f"No template for config: {req.target}"
+        return action
+
+
+@dataclass
+class PrepareReport:
+    """Result of safe auto-preparation."""
+    check_report: BootstrapReport = field(default_factory=BootstrapReport)
+    recheck_report: Optional[BootstrapReport] = None
+    fixed: int = 0
+    skipped_paid: int = 0
+    skipped_interactive: int = 0
+    could_not_fix: int = 0
+    actions_taken: list[dict] = field(default_factory=list)
+
+    @property
+    def improved(self) -> bool:
+        return self.fixed > 0
+
+    def to_dict(self) -> dict:
+        d = {
+            "fixed": self.fixed,
+            "skipped_paid": self.skipped_paid,
+            "skipped_interactive": self.skipped_interactive,
+            "could_not_fix": self.could_not_fix,
+            "improved": self.improved,
+            "actions": self.actions_taken,
+        }
+        if self.recheck_report:
+            d["recheck"] = self.recheck_report.to_dict()
+        return d
