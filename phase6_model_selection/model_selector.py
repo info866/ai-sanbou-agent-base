@@ -66,12 +66,59 @@ FALLBACK_MAP: dict[str, str] = {
 
 @dataclass
 class AliasState:
-    """Tracks known alias state for detecting update-sensitive changes."""
+    """Tracks known alias state for detecting update-sensitive changes.
+    Supports persistence via save/load for real before/after change detection."""
     known_aliases: set = field(default_factory=lambda: set(ALIAS_REGISTRY.keys()))
     alias_roles: dict = field(default_factory=lambda: {
         k: v["role"] for k, v in ALIAS_REGISTRY.items()
     })
+    env_mappings: dict = field(default_factory=dict)  # alias→version from env at snapshot time
     last_checked: Optional[str] = None  # ISO datetime of last official check
+
+    def save(self, path: Path) -> None:
+        """Persist state to disk for cross-session change detection."""
+        data = {
+            "known_aliases": sorted(self.known_aliases),
+            "alias_roles": self.alias_roles,
+            "env_mappings": self.env_mappings,
+            "last_checked": self.last_checked or datetime.now().isoformat(),
+        }
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+    @classmethod
+    def load(cls, path: Path) -> "AliasState":
+        """Load persisted state. Returns fresh state if file missing."""
+        if not path.exists():
+            return cls()
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        state = cls(
+            known_aliases=set(data.get("known_aliases", [])),
+            alias_roles=data.get("alias_roles", {}),
+            env_mappings=data.get("env_mappings", {}),
+            last_checked=data.get("last_checked"),
+        )
+        return state
+
+    @classmethod
+    def snapshot_current(cls) -> "AliasState":
+        """Capture the current live state including env var mappings."""
+        import os
+        env_mappings = {}
+        for alias, info in ALIAS_REGISTRY.items():
+            env_var = info.get("known_env_var")
+            if env_var:
+                val = os.environ.get(env_var)
+                if val:
+                    env_mappings[alias] = val
+        return cls(
+            known_aliases=set(ALIAS_REGISTRY.keys()),
+            alias_roles={k: v["role"] for k, v in ALIAS_REGISTRY.items()},
+            env_mappings=env_mappings,
+            last_checked=datetime.now().isoformat(),
+        )
 
 
 # ── Data classes ─────────────────────────────────────────────────────
@@ -139,18 +186,26 @@ class OfficialRecheckPath:
 
     @staticmethod
     def check_current_aliases() -> dict:
-        """Attempt to discover current alias state from the environment."""
+        """Discover current alias state from the real environment.
+
+        Returns a structured dict with:
+          - registry_aliases: what the code currently knows
+          - env_overrides: actual env var → version mappings
+          - cli_available: whether claude CLI responds
+          - live_snapshot: an AliasState that captures the real current state
+        """
         import os
         findings = {
             "method": "environment_and_cli",
             "timestamp": datetime.now().isoformat(),
-            "aliases_found": {},
+            "registry_aliases": sorted(ALIAS_REGISTRY.keys()),
+            "registry_roles": {k: v["role"] for k, v in ALIAS_REGISTRY.items()},
             "env_overrides": {},
             "cli_available": False,
             "status": "unknown",
         }
 
-        # Check environment variables for version mappings
+        # Check environment variables for actual version mappings
         env_vars = {
             "opus": "ANTHROPIC_DEFAULT_OPUS_MODEL",
             "sonnet": "ANTHROPIC_DEFAULT_SONNET_MODEL",
@@ -161,12 +216,11 @@ class OfficialRecheckPath:
             if val:
                 findings["env_overrides"][alias] = val
 
-        # Check ANTHROPIC_MODEL for default override
         default_model = os.environ.get("ANTHROPIC_MODEL")
         if default_model:
             findings["env_overrides"]["default"] = default_model
 
-        # Attempt to check Claude Code CLI availability
+        # Check Claude Code CLI
         try:
             result = subprocess.run(
                 ["claude", "--version"],
@@ -178,7 +232,9 @@ class OfficialRecheckPath:
         except (FileNotFoundError, subprocess.TimeoutExpired):
             findings["cli_available"] = False
 
-        # Determine status
+        # Build live snapshot for real comparison
+        findings["live_snapshot"] = AliasState.snapshot_current()
+
         if findings["env_overrides"]:
             findings["status"] = "env_overrides_found"
         elif findings["cli_available"]:
@@ -211,33 +267,43 @@ class OfficialRecheckPath:
 
     @staticmethod
     def detect_changes(previous_state: AliasState) -> RecheckDetail:
-        """Compare current alias state against a previous snapshot.
-        Returns recheck detail with canon-compliant triggers."""
-        current_aliases = set(ALIAS_REGISTRY.keys())
+        """Compare current live state against a persisted/previous snapshot.
+
+        Detects all 4 canon triggers by real before/after comparison:
+          1. new alias added (registry diff)
+          2. alias meaning changed (role text diff)
+          3. version mapping changed (env var diff against persisted env_mappings)
+          4. alias removed (registry diff)
+        """
+        import os
+        current = AliasState.snapshot_current()
         triggers = []
 
         # Canon trigger 1: New alias added
-        new_aliases = current_aliases - previous_state.known_aliases
+        new_aliases = current.known_aliases - previous_state.known_aliases
         if new_aliases:
             triggers.append(f"new_alias_added: {', '.join(sorted(new_aliases))}")
 
-        # Canon trigger 2: Alias meaning changed
-        for alias in current_aliases & previous_state.known_aliases:
-            current_role = ALIAS_REGISTRY[alias]["role"]
+        # Canon trigger 2: Alias meaning/role changed
+        for alias in current.known_aliases & previous_state.known_aliases:
+            current_role = current.alias_roles.get(alias, "")
             previous_role = previous_state.alias_roles.get(alias, "")
             if current_role != previous_role:
                 triggers.append(f"alias_meaning_changed: {alias}")
 
-        # Canon trigger 3: Recommended usage changed
-        # (detected via environment variable differences)
-        import os
+        # Canon trigger 3: Version mapping changed behind stable alias
+        # Compare current env mappings against persisted env_mappings
         for alias, info in ALIAS_REGISTRY.items():
             env_var = info.get("known_env_var")
-            if env_var and os.environ.get(env_var):
+            if not env_var:
+                continue
+            current_val = os.environ.get(env_var, "")
+            previous_val = previous_state.env_mappings.get(alias, "")
+            if current_val and current_val != previous_val:
                 triggers.append(f"version_mapping_changed: {alias} via {env_var}")
 
-        # Canon trigger 4: Available model mapping changed
-        removed_aliases = previous_state.known_aliases - current_aliases
+        # Canon trigger 4: Alias removed
+        removed_aliases = previous_state.known_aliases - current.known_aliases
         if removed_aliases:
             triggers.append(f"alias_removed: {', '.join(sorted(removed_aliases))}")
 
