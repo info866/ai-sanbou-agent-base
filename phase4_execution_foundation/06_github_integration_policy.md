@@ -139,7 +139,7 @@ $ git commit -m "feat(mcp_integration): 参考: anthropics/mcp-examples#42
 $ git notes add -m "比較対象: vercel/next.js vs astro/astro (2026-04-13時点)
   - 選定理由: [why next.js]
   - 比較対象: https://github.com/astro/astro
-  - 比較結果: ../phase2_decision_foundation/02_comparison_results/"
+  - 比較結果: ../phase2_decision_foundation/02_comparison_units_and_matrix_plan.md
 ```
 
 #### パターン3: OSS 学習リンク
@@ -157,7 +157,7 @@ OSS参考:
 - [LiteLLM Docs](https://litellm.ai)
 
 比較検証:
-- ../_decision_foundation/comparison_results.md
+- ../phase2_decision_foundation/02_comparison_units_and_matrix_plan.md
 """
 ```
 
