@@ -92,10 +92,10 @@
 - 新規ツール導入・既存ツール活用の最適化を含む
 
 **対応する能力:** 主にP1/P2の自動化能力
-- F-004 Hooks（自動化トリガー）
-- F-005 Skills（作業パッケージ化）
-- F-010/F-014 GitHub Actions（CI/CD）
-- F-011 Cloud Scheduled Tasks（定期実行）
+- F-004 Hooks（自動化トリガー — コミット、イベント駆動）
+- F-005 Skills（作業パッケージ化・再利用）
+- F-010/F-014 GitHub Actions（CI/CD・PRレビュー自動化）
+- F-011 Cloud Scheduled Tasks（/scheduleコマンドによる定期タスク自動実行、D2試験導入候補、P3中優先）
 
 ---
 

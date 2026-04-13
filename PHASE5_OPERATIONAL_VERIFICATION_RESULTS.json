@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-13T13:45:51.801482",
+  "timestamp": "2026-04-13T14:03:21.364816",
   "tests": [
     {
       "name": "Phase 5 deliverable existence",
@@ -14,10 +14,64 @@
       "passed": 6
     },
     {
-      "name": "Capability selection (6 classes)",
+      "name": "Goal 1: F-011 definition",
       "pass": true,
-      "checks": 6,
-      "passed": 6
+      "checks": 5,
+      "passed": 5
+    },
+    {
+      "name": "Goal 1: F-011 selected for scheduling",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
+    },
+    {
+      "name": "Goal 1: F-011 NOT selected when irrelevant",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
+    },
+    {
+      "name": "Goal 2: RC-6 different selections",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
+    },
+    {
+      "name": "Goal 2: RC-3 different selections",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
+    },
+    {
+      "name": "Goal 2: RC-1 different selections",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
+    },
+    {
+      "name": "Goal 2: Request-specific reasons",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
+    },
+    {
+      "name": "Goal 3: No T4 for irrelevant requests",
+      "pass": true,
+      "checks": 4,
+      "passed": 4
+    },
+    {
+      "name": "Goal 3: T4 emitted when relevant",
+      "pass": true,
+      "checks": 3,
+      "passed": 3
+    },
+    {
+      "name": "Goal 3: No T4 cross-contamination",
+      "pass": true,
+      "checks": 1,
+      "passed": 1
     },
     {
       "name": "Reason generation (3 elements)",
@@ -26,19 +80,13 @@
       "passed": 3
     },
     {
-      "name": "Reconfirmation judgment (T4 detection)",
-      "pass": true,
-      "checks": 1,
-      "passed": 1
-    },
-    {
       "name": "Execution handoff (5 elements)",
       "pass": true,
       "checks": 4,
       "passed": 4
     },
     {
-      "name": "Update absorption (new + obsolescence)",
+      "name": "Update absorption (5 paths)",
       "pass": true,
       "checks": 5,
       "passed": 5
@@ -50,13 +98,13 @@
       "passed": 3
     },
     {
-      "name": "Phase 4 integration check",
+      "name": "Phase 4 integration",
       "pass": true,
       "checks": 7,
       "passed": 7
     }
   ],
   "all_pass": true,
-  "total_checks": 42,
-  "passed_checks": 42
+  "total_checks": 54,
+  "passed_checks": 54
 }

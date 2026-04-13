@@ -9,36 +9,49 @@
 
 依頼分類（02_request_classification.md）の結果を受けて、使うべき能力と使わない能力を決定するルールを定義する。再確認判断もこのルールに含む。
 
+選定は依頼分類だけで自動決定しない。同じ分類でも、依頼の内容に応じて選定結果が変わる。
+
 ---
 
 ## 能力選定の3段階
 
-### 段階1｜候補の絞り込み
+### 段階1｜候補プールの決定
 
-依頼分類に応じて、候補プールを決定する。
+依頼分類に応じて、評価対象となる候補プールを決定する。プールに入ることは選定を意味しない。
 
-| 分類 | 第一候補プール | 第二候補プール |
-|------|-------------|-------------|
-| RC-1 調査 | P1: MCP, Subagents, Memory Tool | P2: MCP Servers, promptfoo |
-| RC-2 比較 | P1: MCP, Subagents | P2: promptfoo, anthropics/skills |
-| RC-3 実装 | P1: MCP, Subagents, Hooks, Skills, Agent SDK | P2: GitHub Actions, claude-agent-sdk-python |
-| RC-4 修正 | P1: MCP, Subagents, Hooks | P2: GitHub Actions |
-| RC-5 設計 | P1: MCP, Subagents, Agent SDK | P2: claude-agent-sdk-python, MCP Servers |
-| RC-6 運用改善 | P1: Hooks, Skills, MCP | P2: GitHub Actions, Cloud Scheduled Tasks |
+| 分類 | 候補プール |
+|------|----------|
+| RC-1 調査 | F-002 MCP, F-003 Subagents, F-005 Skills, F-019 MCP Servers, F-025 Memory Tool, F-032 promptfoo |
+| RC-2 比較 | F-002 MCP, F-003 Subagents, F-013 anthropics/skills, F-019 MCP Servers, F-025 Memory Tool, F-032 promptfoo |
+| RC-3 実装 | F-002 MCP, F-003 Subagents, F-004 Hooks, F-005 Skills, F-009 Agent SDK, F-010 GitHub Actions, F-014 claude-code-action, F-015 claude-agent-sdk-python, F-025 Memory Tool |
+| RC-4 修正 | F-002 MCP, F-003 Subagents, F-004 Hooks, F-010 GitHub Actions, F-025 Memory Tool |
+| RC-5 設計 | F-002 MCP, F-003 Subagents, F-009 Agent SDK, F-015 claude-agent-sdk-python, F-019 MCP Servers, F-025 Memory Tool |
+| RC-6 運用改善 | F-002 MCP, F-004 Hooks, F-005 Skills, F-010 GitHub Actions, F-011 Cloud Scheduled Tasks, F-014 claude-code-action, F-025 Memory Tool |
 
-**候補プールの元データ:**
-- P1最優先: phase2_decision_foundation/05_adoption_build_vs_buy_priority.md パート3 P1
-- P2高優先: 同パート3 P2
-- D1採用候補: 同パート1 D1
-- D2試験導入候補: 同パート1 D2
+**F-011 Cloud Scheduled Tasks** は /scheduleコマンドによる定期タスク自動実行（D2試験導入候補、P3中優先）。定期実行・スケジュール・cron関連の依頼で選定対象になる。
 
 ---
 
-### 段階2｜適合判定
+### 段階2｜依頼内容に基づく適合判定
 
-候補プールから、今回の依頼に実際に効く能力だけを選ぶ。
+候補プール内の各能力に対して、依頼の内容と照合して適合を判定する。
 
-**適合判定の8基準（全てYES/NOで判定）:**
+**判定の2つの経路:**
+
+1. **キーワード適合**: 依頼文に能力の関連キーワードが含まれている → S1+S2が成立
+2. **基盤適合**: その分類で汎用的に有効な能力（少数） → S1のみ成立
+
+**分類別の基盤能力（キーワード不要で選定される最小セット）:**
+- RC-1 調査: F-003 Subagents（並列調査に汎用的に有効）
+- RC-2 比較: F-032 promptfoo（比較評価に汎用的に有効）
+- RC-3 実装: F-002 MCP（接続基盤）, F-004 Hooks（品質フック）
+- RC-4 修正: F-003 Subagents（並列調査・デバッグに汎用的に有効）
+- RC-5 設計: F-002 MCP（接続設計）, F-009 Agent SDK（エージェント設計）
+- RC-6 運用改善: なし（依頼内容で何を自動化するか特定する必要がある）
+
+**基盤能力以外はキーワード適合が必要。** 同じRC-6でも「定期タスクを自動化」ならF-011が選定され、「コミットフックを自動化」ならF-004が選定される。
+
+**適合判定の8基準:**
 
 | # | 基準 | 判定質問 |
 |---|------|---------|
@@ -53,8 +66,7 @@
 
 **選定ルール:**
 - S1がNO → 不選定（目的に効かない能力は使わない）
-- S2がNO → 不選定（今回不要な能力は持ち込まない）
-- S1+S2がYESで、S6またはS7がYES → 選定候補
+- S1がYES（基盤適合またはキーワード適合） → 選定候補
 - S8がYES → 再確認判断へ（下記パート参照）
 
 ---
@@ -67,28 +79,29 @@
 - P1候補が適合している → 原則として使う
 - P2候補が適合している → P1で不足する場合に使う
 - D2試験候補が適合している → P1+P2で不足し、かつセットアップ120分以内なら試す
-- 複数候補が同等に適合 → Phase 2の評価スコア（E1〜E10）で上位を選ぶ
 
 **使わないと決めた能力の記録:**
 - item_idと候補名
-- 不選定理由（S1〜S8のどれがNOか）
-- 再検討条件（条件が変われば選定に変わるか）
+- 不選定理由（「依頼にキーワード適合せず、基盤能力でもない」等、依頼固有の理由）
 
 ---
 
 ## 再確認判断ルール
 
-能力選定中にS8（鮮度確認要否）がYESになった場合、以下のルールで再確認を判断する。
+再確認は全T4候補を常に出すのではなく、**今回の依頼に関連するT4候補のみ** 対象にする。
 
-### 再確認が必要な条件
+### 再確認対象の判定
 
-| 条件 | 該当能力の例 | 確認方法 |
-|------|-----------|---------|
-| 信頼区分がT4（再確認前提） | F-006 Managed Agents, F-008 Agent Teams, F-012 Advisor Tool | 公式リリースノート確認 |
-| last_checked_atが90日超過 | — | KL-1メタデータ確認 |
-| beta/experimentalの状態判断 | F-006, F-008, F-012 | Anthropicリリースノート |
-| API仕様に依存する実装 | Agent SDK, MCP Connector | 公式ドキュメント確認 |
-| OSS活性度に依存する採用 | stars低下・更新停止の兆候 | GitHubリポジトリ確認 |
+T4候補は以下の3件:
+- F-006 Managed Agents（beta）— 関連キーワード: managed agent, オーケストレーション
+- F-008 Agent Teams（experimental）— 関連キーワード: agent team, マルチエージェント
+- F-012 Advisor Tool（beta）— 関連キーワード: advisor, アドバイザー
+
+**再確認が発動する条件:**
+依頼文にT4候補の関連キーワードが含まれる場合のみ、そのT4候補を再確認対象として出力する。
+
+**再確認が発動しない場合:**
+依頼がT4候補と無関係なら（例: MCPサーバー調査、コミットフック設定）、T4項目は一切出力しない。
 
 ### 再確認を省略してよい条件
 
@@ -110,14 +123,13 @@
 
 ```
 使う能力:
-  - [item_id] 能力名 — 役割: 〇〇に使う
+  - [item_id] 能力名 — 役割: 〇〇に使う（matched: キーワード / base capability）
   - [item_id] 能力名 — 役割: 〇〇に使う
 
 使わない能力:
-  - [item_id] 能力名 — 理由: S1不適合（目的に直接効かない）
-  - [item_id] 能力名 — 理由: S2不適合（今回不要）
+  - [item_id] 能力名 — 理由: 依頼に関連キーワードなし
+  - [item_id] 能力名 — 理由: 候補プール外
 
-再確認が必要:
-  - [item_id] 能力名 — 理由: T4（beta状態の確認が必要）
-  - 確認方法: 公式リリースノート
+再確認が必要:（T4候補が依頼に関連する場合のみ）
+  - [item_id] 能力名 — 理由: T4（依頼がXXを言及、beta状態の確認が必要）
 ```
