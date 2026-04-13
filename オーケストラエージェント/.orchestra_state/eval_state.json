@@ -1,0 +1,92 @@
+{
+  "records": [
+    {
+      "record_id": "orch-20260413-204323",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003",
+        "F-025"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-025"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-13T20:43:23.463273"
+    },
+    {
+      "record_id": "orch-20260413-204729",
+      "classification": "RC-5",
+      "model_used": "opusplan",
+      "model_recommended": "opusplan",
+      "capabilities_used": [
+        "F-003",
+        "F-009"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-009"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-13T20:47:29.714751"
+    },
+    {
+      "record_id": "orch-20260413-204908",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003",
+        "F-025"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-025"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-13T20:49:08.871047"
+    }
+  ],
+  "last_report": {
+    "period": "2026-04-13T20:43:23.463273 → 2026-04-13T20:49:08.871047",
+    "total_executions": 3,
+    "success_rate": 0.333,
+    "model_accuracy": {
+      "total": 3,
+      "correct": 1,
+      "accuracy": 0.333,
+      "efficiency": 1.0,
+      "overqualified": 0,
+      "underqualified": 0,
+      "mismatches": 0
+    },
+    "capability_accuracy": {
+      "total": 3,
+      "correct": 1,
+      "accuracy": 0.333,
+      "efficiency": 1.0,
+      "overqualified": 0,
+      "underqualified": 0,
+      "mismatches": 0
+    },
+    "proposals": [],
+    "classification_stats": {
+      "RC-1": 2,
+      "RC-5": 1
+    }
+  }
+}
