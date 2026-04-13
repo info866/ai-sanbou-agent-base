@@ -72,10 +72,11 @@
   - KL-1: 構造化メタデータ（候補ID・採用状態・優先順位・信頼区分）
   - KL-2: 判断記録（採用理由・比較結果・未解決論点）
   - KL-3: 文書知識（README要約・実装パターン）
+  - KL-4: 再確認要知識（今回確認が必要な項目）
 
 **参照対象**:
-- phase2_decision_foundation/05_adoption_judgement.md（採用状態）
-- phase2_decision_foundation/04_candidate_evaluation.md（評価スコア）
+- phase2_decision_foundation/05_adoption_build_vs_buy_priority.md（採用状態）
+- phase2_decision_foundation/04_candidate_evaluations.md（評価スコア）
 - phase3_knowledge_foundation/06_recheck_rules_and_trust.md（信頼区分）
 
 **判定ポイント**:
@@ -159,7 +160,7 @@
 #### 2-1 比較対象選定
 
 **実行内容**:
-- phase2_decision_foundation/02_comparison_groups.md から該当する比較グループ（CG-01〜CG-06）を特定
+- phase2_decision_foundation/02_comparison_units_and_matrix_plan.md から該当する比較グループ（CG-01〜CG-06）を特定
 - 各候補の compared_with フィールドで過去の比較対象を確認
 
 **比較グループ一覧** (phase2から):
@@ -222,7 +223,7 @@
 #### 2-3 採用判断
 
 **実行内容**:
-- phase2_decision_foundation/05_adoption_judgement.md に基づき、D1〜D5の判定を確定
+- phase2_decision_foundation/05_adoption_build_vs_buy_priority.md に基づき、D1〜D5の判定を確定
 
 **採用状態コード**:
 - **D1**: 採用候補（実装予定）

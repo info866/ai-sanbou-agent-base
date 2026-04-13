@@ -19,7 +19,7 @@
 
 ### 開始条件
 - 対象候補が明確に決定している
-- phase2_decision_foundation/05 で採用状態が確認されている
+- phase2_decision_foundation/05_adoption_build_vs_buy_priority.md で採用状態が確認されている
 - 今回のタスクで何を知る必要があるかが明確になっている
 
 ### 実行フロー
@@ -67,14 +67,14 @@
 
 ### 開始条件
 - 比較対象候補が 2件以上決定している
-- phase2_decision_foundation/01 の評価基準（E1〜E10）が利用可能である
+- phase2_decision_foundation/01_evaluation_criteria.md の評価基準（E1〜E10）が利用可能である
 - 今回の比較の「決定対象」が明確（採用判定 or 優先順位決定 or 効果検証）
 
 ### 実行フロー
 
 ```
 1. 比較対象選定
-   ├─ phase2_decision_foundation/02 から該当する比較グループ確認
+   ├─ phase2_decision_foundation/02_comparison_units_and_matrix_plan.md から該当する比較グループ確認
    └─ 過去の比較結果があるか確認（重複比較は避ける）
 
 2. 評価基準適用（E1〜E10）
