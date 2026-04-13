@@ -24,6 +24,16 @@ from datetime import datetime
 BASE = Path(__file__).parent
 PHASE5 = BASE / "phase5_ai_advisor"
 PHASE4 = BASE / "phase4_execution_foundation"
+PHASE6 = BASE / "phase6_model_selection"
+
+# Add Phase 6 to import path
+sys.path.insert(0, str(PHASE6))
+from model_selector import (
+    ModelSelector, SelectionInput, SelectionOutput, AliasState,
+    OfficialRecheckPath, RecheckDetail,
+    ALIAS_REGISTRY, FALLBACK_MAP,
+    RC_TO_PARAMS, rc_to_model_input, select_model, select_model_for_rc,
+)
 
 # ── Unified Capability Model (from Phase 2, enriched for Phase 5) ──
 
@@ -171,7 +181,20 @@ CLASSIFICATION_POOLS = {
 # ── AI参謀 Core Logic ─────────────────────────────────────────────
 
 class AIAdvisor:
-    """AI参謀 implementation following Phase 5 rules with request-sensitive judgment."""
+    """AI参謀 implementation following Phase 5 rules with request-sensitive judgment.
+
+    Integrates Phase 6 model selection into the advisory flow:
+      classify_request → select_model → select_capabilities → generate_reason → create_execution_handoff
+    """
+
+    def __init__(self, alias_state: AliasState | None = None):
+        self._model_selector = ModelSelector(alias_state=alias_state)
+
+    def select_model(self, classification: str, request: str,
+                     overrides: dict | None = None) -> SelectionOutput:
+        """Phase 6 integration: Select model alias based on classification + request."""
+        input_ = rc_to_model_input(classification, request, overrides)
+        return self._model_selector.select(input_)
 
     def classify_request(self, request: str) -> dict:
         """STEP 1: Request classification (02_request_classification.md)."""
@@ -364,8 +387,12 @@ class AIAdvisor:
             "has_all_3_elements": has_all_3,
         }
 
-    def create_execution_handoff(self, classification: str, selected: list) -> dict:
-        """STEP 7: Execution handoff (05_execution_handoff.md)."""
+    def create_execution_handoff(self, classification: str, selected: list,
+                                model_selection: SelectionOutput | None = None) -> dict:
+        """STEP 7: Execution handoff (05_execution_handoff.md).
+
+        Now carries Phase 6 model selection results into Phase 4 handoff.
+        """
         step_map = {
             "RC-1": ["調査", "記録", "GitHub反映"],
             "RC-2": ["調査", "比較", "記録", "GitHub反映"],
@@ -397,6 +424,19 @@ class AIAdvisor:
                 "push_target": "origin/main",
             },
         }
+
+        # Phase 6 integration: carry model selection into handoff
+        if model_selection:
+            handoff["model"] = {
+                "recommended": model_selection.recommended_model,
+                "fallback": model_selection.fallback_model,
+                "reason": model_selection.reason,
+                "recheck_required": model_selection.recheck_required,
+                "handoff_notes": model_selection.handoff_notes,
+            }
+        else:
+            handoff["model"] = None
+
         handoff["has_5_elements"] = all([
             handoff["target"],
             len(handoff["capabilities"]) > 0,
@@ -832,7 +872,7 @@ def test_update_absorption():
 
 
 def test_end_to_end():
-    """Full pipeline for 3 diverse requests."""
+    """Full pipeline for 3 diverse requests — now includes Phase 6 model selection."""
     advisor = AIAdvisor()
     results = []
     requests = [
@@ -843,19 +883,27 @@ def test_end_to_end():
     for req in requests:
         cls = advisor.classify_request(req)
         rc = cls["classification"]
+        # Phase 6 model selection integrated
+        ms = advisor.select_model(rc, req)
         sel = advisor.select_capabilities(rc, req)
         reason = advisor.generate_reason(rc, req, sel["selected"], sel["not_selected"])
-        ho = advisor.create_execution_handoff(rc, sel["selected"])
+        ho = advisor.create_execution_handoff(rc, sel["selected"], model_selection=ms)
         ok = all([
             rc.startswith("RC-"),
+            ms.recommended_model in ("opus", "sonnet", "haiku", "opusplan"),
+            ms.fallback_model in ("opus", "sonnet", "haiku", "opusplan"),
             len(sel["selected"]) > 0,
             reason["has_all_3_elements"],
             ho["has_5_elements"],
+            ho.get("model") is not None,
         ])
         results.append({
             "request": req[:30], "class": rc,
+            "model": ms.recommended_model,
+            "fallback": ms.fallback_model,
             "selected": len(sel["selected"]),
             "t4_count": len(sel["recheck_needed"]),
+            "handoff_has_model": ho.get("model") is not None,
             "pass": ok,
         })
     return results
@@ -878,31 +926,492 @@ def test_phase4_integration():
     return results
 
 
+# ── Phase 6 Model Selection Tests ────────────────────────────────────
+
+def test_ms_simple_routes_haiku():
+    """Phase 6 Goal: Simple/light task → haiku."""
+    ms = select_model(goal="Fix typo", reasoning_weight=0.1, ambiguity=0.1,
+                      failure_cost=0.0, speed_priority=0.8, context_size=0.1, plan_weight=0.0)
+    return [{"test": "simple→haiku", "got": ms.recommended_model,
+             "pass": ms.recommended_model == "haiku"}]
+
+
+def test_ms_standard_routes_sonnet():
+    """Phase 6 Goal: Standard coding → sonnet."""
+    ms = select_model(goal="Implement auth", reasoning_weight=0.5, ambiguity=0.3,
+                      failure_cost=0.3, speed_priority=0.2, context_size=0.4, plan_weight=0.2)
+    return [{"test": "standard→sonnet", "got": ms.recommended_model,
+             "pass": ms.recommended_model == "sonnet"}]
+
+
+def test_ms_complex_routes_opus():
+    """Phase 6 Goal: Complex/high-risk → opus."""
+    ms = select_model(goal="Design complex system", reasoning_weight=0.9, ambiguity=0.8,
+                      failure_cost=0.9, speed_priority=0.1, context_size=0.6, plan_weight=0.3)
+    return [{"test": "complex→opus", "got": ms.recommended_model,
+             "pass": ms.recommended_model == "opus"}]
+
+
+def test_ms_plan_routes_opusplan():
+    """Phase 6 Goal: Plan-heavy + execution-normal → opusplan."""
+    ms = select_model(goal="Plan CI/CD architecture", reasoning_weight=0.8, ambiguity=0.7,
+                      failure_cost=0.5, speed_priority=0.1, context_size=0.5, plan_weight=0.9)
+    return [{"test": "plan→opusplan", "got": ms.recommended_model,
+             "pass": ms.recommended_model == "opusplan"}]
+
+
+def test_ms_fallback_always_present():
+    """Phase 6 Goal: Fallback is always present and sensible."""
+    results = []
+    cases = [
+        (0.1, 0.1, 0.0, 0.8, 0.1, 0.0),   # haiku
+        (0.5, 0.3, 0.3, 0.2, 0.4, 0.2),   # sonnet
+        (0.9, 0.8, 0.9, 0.1, 0.6, 0.3),   # opus
+        (0.8, 0.7, 0.5, 0.1, 0.5, 0.9),   # opusplan
+    ]
+    for rw, a, fc, sp, cs, pw in cases:
+        ms = select_model(goal="test", reasoning_weight=rw, ambiguity=a,
+                          failure_cost=fc, speed_priority=sp, context_size=cs, plan_weight=pw)
+        valid = (ms.fallback_model in ("opus", "sonnet", "haiku", "opusplan")
+                 and ms.fallback_model != ms.recommended_model)
+        results.append({"rec": ms.recommended_model, "fb": ms.fallback_model, "pass": valid})
+    return results
+
+
+def test_ms_output_shape():
+    """Phase 6 Goal: Output matches required shape."""
+    ms = select_model(goal="test", reasoning_weight=0.5, ambiguity=0.3,
+                      failure_cost=0.3, speed_priority=0.2, context_size=0.3, plan_weight=0.2)
+    d = ms.to_dict()
+    required = ["goal", "recommended_model", "fallback_model", "reason", "recheck_required", "handoff_notes"]
+    results = []
+    for key in required:
+        results.append({"field": key, "present": key in d, "pass": key in d})
+    results.append({"field": "reason_short", "len": len(ms.reason), "pass": len(ms.reason) <= 200})
+    return results
+
+
+# ── Phase 6 Canon Recheck Tests (Goal 1) ─────────────────────────────
+
+def test_ms_recheck_canon_no_change():
+    """Goal 1: No update-sensitive conditions → recheck_required=False."""
+    state = AliasState()
+    ms = select_model(goal="Normal work", reasoning_weight=0.5, ambiguity=0.3,
+                      failure_cost=0.3, speed_priority=0.2, context_size=0.3,
+                      plan_weight=0.2, alias_state=state)
+    return [{"test": "no_change→no_recheck",
+             "recheck": ms.recheck_required, "pass": not ms.recheck_required}]
+
+
+def test_ms_recheck_canon_new_alias():
+    """Goal 1: New alias added → recheck_required=True."""
+    # Snapshot before adding new alias
+    state = AliasState()
+    # Now add a new alias
+    ModelSelector.add_alias("turbo", "Ultra-fast experimental model", tier=0, fallback="haiku")
+    try:
+        ms = select_model(goal="Test new alias", reasoning_weight=0.5, ambiguity=0.3,
+                          failure_cost=0.3, speed_priority=0.2, context_size=0.3,
+                          plan_weight=0.2, alias_state=state)
+        triggered = ms.recheck_required
+        has_trigger = any("new_alias_added" in t for t in (ms.recheck_detail.triggers if ms.recheck_detail else []))
+        return [{"test": "new_alias→recheck", "recheck": triggered,
+                 "has_trigger": has_trigger, "pass": triggered and has_trigger}]
+    finally:
+        ModelSelector.remove_alias("turbo")
+
+
+def test_ms_recheck_canon_role_change():
+    """Goal 1: Alias role/meaning changed → recheck_required=True."""
+    state = AliasState()
+    original_role = ALIAS_REGISTRY["haiku"]["role"]
+    # Simulate role change
+    ModelSelector.update_alias_role("haiku", "Now a mid-tier reasoning model")
+    try:
+        ms = select_model(goal="Test role change", reasoning_weight=0.5, ambiguity=0.3,
+                          failure_cost=0.3, speed_priority=0.2, context_size=0.3,
+                          plan_weight=0.2, alias_state=state)
+        triggered = ms.recheck_required
+        has_trigger = any("alias_meaning_changed" in t for t in (ms.recheck_detail.triggers if ms.recheck_detail else []))
+        return [{"test": "role_change→recheck", "recheck": triggered,
+                 "has_trigger": has_trigger, "pass": triggered and has_trigger}]
+    finally:
+        ModelSelector.update_alias_role("haiku", original_role)
+
+
+def test_ms_recheck_canon_alias_removed():
+    """Goal 1: Alias removed → recheck_required=True (detected as removal)."""
+    # Snapshot with 5 aliases (temporarily add one)
+    ModelSelector.add_alias("legacy", "Old model", tier=0, fallback="sonnet")
+    state = AliasState()
+    # Now remove it
+    ModelSelector.remove_alias("legacy")
+    ms = select_model(goal="Test removal", reasoning_weight=0.5, ambiguity=0.3,
+                      failure_cost=0.3, speed_priority=0.2, context_size=0.3,
+                      plan_weight=0.2, alias_state=state)
+    triggered = ms.recheck_required
+    has_trigger = any("alias_removed" in t for t in (ms.recheck_detail.triggers if ms.recheck_detail else []))
+    return [{"test": "alias_removed→recheck", "recheck": triggered,
+             "has_trigger": has_trigger, "pass": triggered and has_trigger}]
+
+
+# ── Phase 6 Official Recheck Path Tests (Goal 2) ─────────────────────
+
+def test_ms_official_recheck_path_exists():
+    """Goal 2: Official recheck path is implemented and callable."""
+    results = []
+    path = OfficialRecheckPath()
+
+    # 1. check_current_aliases returns structured result
+    findings = path.check_current_aliases()
+    results.append({
+        "test": "check_current_aliases returns dict",
+        "has_method": "method" in findings,
+        "has_status": "status" in findings,
+        "pass": "method" in findings and "status" in findings,
+    })
+
+    # 2. verify_alias_still_valid works for known alias
+    v = path.verify_alias_still_valid("opus")
+    results.append({
+        "test": "verify opus alias",
+        "valid": v["valid"], "pass": v["valid"],
+    })
+
+    # 3. verify_alias_still_valid detects unknown alias
+    v = path.verify_alias_still_valid("nonexistent")
+    results.append({
+        "test": "detect unknown alias",
+        "valid": v["valid"], "pass": not v["valid"],
+    })
+
+    # 4. detect_changes returns RecheckDetail
+    state = AliasState()
+    detail = path.detect_changes(state)
+    results.append({
+        "test": "detect_changes returns RecheckDetail",
+        "type": type(detail).__name__,
+        "pass": isinstance(detail, RecheckDetail),
+    })
+
+    return results
+
+
+# ── Phase 6 Phase 5 Integration Tests (Goal 3) ───────────────────────
+
+def test_ms_phase5_advisor_has_select_model():
+    """Goal 3: AIAdvisor has select_model method."""
+    advisor = AIAdvisor()
+    has_method = hasattr(advisor, "select_model") and callable(advisor.select_model)
+    return [{"test": "AIAdvisor.select_model exists", "pass": has_method}]
+
+
+def test_ms_phase5_classify_then_select():
+    """Goal 3: Phase 5 classification → Phase 6 model selection works."""
+    advisor = AIAdvisor()
+    results = []
+    cases = [
+        ("MCPサーバーの一覧を調査してほしい", "RC-1"),
+        ("GitHub Actionsの自動PRレビューを実装してほしい", "RC-3"),
+        ("AI参謀のアーキテクチャを設計してほしい", "RC-5"),
+    ]
+    for req, expected_rc in cases:
+        cls = advisor.classify_request(req)
+        ms = advisor.select_model(cls["classification"], req)
+        ok = ms.recommended_model in ("opus", "sonnet", "haiku", "opusplan")
+        results.append({
+            "request": req[:30], "class": cls["classification"],
+            "model": ms.recommended_model, "pass": ok,
+        })
+    return results
+
+
+# ── Phase 6 Phase 4 Handoff Tests (Goal 4) ───────────────────────────
+
+def test_ms_phase4_handoff_carries_model():
+    """Goal 4: Phase 4 handoff contains model selection results."""
+    advisor = AIAdvisor()
+    req = "GitHub Actionsの自動PRレビューを実装してほしい"
+    cls = advisor.classify_request(req)
+    rc = cls["classification"]
+    ms = advisor.select_model(rc, req)
+    sel = advisor.select_capabilities(rc, req)
+    ho = advisor.create_execution_handoff(rc, sel["selected"], model_selection=ms)
+
+    results = []
+    results.append({"test": "handoff has model key",
+                     "pass": "model" in ho and ho["model"] is not None})
+    if ho.get("model"):
+        m = ho["model"]
+        results.append({"test": "model.recommended present",
+                         "value": m.get("recommended"),
+                         "pass": m.get("recommended") in ("opus", "sonnet", "haiku", "opusplan")})
+        results.append({"test": "model.fallback present",
+                         "value": m.get("fallback"),
+                         "pass": m.get("fallback") in ("opus", "sonnet", "haiku", "opusplan")})
+        results.append({"test": "model.reason present",
+                         "pass": bool(m.get("reason"))})
+        results.append({"test": "model.recheck_required present",
+                         "pass": "recheck_required" in m})
+        results.append({"test": "model.handoff_notes present",
+                         "pass": "handoff_notes" in m})
+    return results
+
+
+# ── Phase 6 Update-Robustness Dynamic Tests (Goal 6) ─────────────────
+
+def test_ms_update_new_alias_dynamic():
+    """Goal 6: New alias appears → system remains operable, marks recheck."""
+    state_before = AliasState()
+    ModelSelector.add_alias("flash", "Experimental ultra-fast model", tier=0, fallback="haiku")
+    try:
+        ms = select_model(goal="Quick task", reasoning_weight=0.1, ambiguity=0.1,
+                          failure_cost=0.0, speed_priority=0.9, context_size=0.1,
+                          plan_weight=0.0, alias_state=state_before)
+        operable = ms.recommended_model in ALIAS_REGISTRY
+        recheck = ms.recheck_required
+        return [{"test": "new_alias_operable", "model": ms.recommended_model,
+                 "recheck": recheck, "pass": operable and recheck}]
+    finally:
+        ModelSelector.remove_alias("flash")
+
+
+def test_ms_update_role_change_dynamic():
+    """Goal 6: Alias role changes → recheck triggered, selection still works."""
+    state_before = AliasState()
+    orig = ALIAS_REGISTRY["sonnet"]["role"]
+    ModelSelector.update_alias_role("sonnet", "Now primarily a reasoning model")
+    try:
+        ms = select_model(goal="Standard task", reasoning_weight=0.5, ambiguity=0.3,
+                          failure_cost=0.3, speed_priority=0.2, context_size=0.3,
+                          plan_weight=0.2, alias_state=state_before)
+        operable = ms.recommended_model in ALIAS_REGISTRY
+        recheck = ms.recheck_required
+        return [{"test": "role_change_operable", "model": ms.recommended_model,
+                 "recheck": recheck, "pass": operable and recheck}]
+    finally:
+        ModelSelector.update_alias_role("sonnet", orig)
+
+
+def test_ms_update_version_mapping_dynamic():
+    """Goal 6: Version mapping changes behind stable alias → recheck triggered."""
+    import os
+    state_before = AliasState()
+    # Simulate version mapping change via env var
+    os.environ["ANTHROPIC_DEFAULT_OPUS_MODEL"] = "claude-opus-5-0"
+    try:
+        ms = select_model(goal="Important task", reasoning_weight=0.7, ambiguity=0.5,
+                          failure_cost=0.6, speed_priority=0.1, context_size=0.4,
+                          plan_weight=0.2, alias_state=state_before)
+        operable = ms.recommended_model in ALIAS_REGISTRY
+        recheck = ms.recheck_required
+        has_trigger = any("version_mapping_changed" in t
+                          for t in (ms.recheck_detail.triggers if ms.recheck_detail else []))
+        return [{"test": "version_mapping_recheck", "model": ms.recommended_model,
+                 "recheck": recheck, "has_trigger": has_trigger,
+                 "pass": operable and recheck and has_trigger}]
+    finally:
+        os.environ.pop("ANTHROPIC_DEFAULT_OPUS_MODEL", None)
+
+
+def test_ms_update_recommended_usage_change():
+    """Goal 6: Recommended usage changes (role text update) → recheck triggered."""
+    state_before = AliasState()
+    orig = ALIAS_REGISTRY["haiku"]["role"]
+    ModelSelector.update_alias_role("haiku", "Now recommended for medium complexity tasks too")
+    try:
+        ms = select_model(goal="Medium task", reasoning_weight=0.5, ambiguity=0.3,
+                          failure_cost=0.3, speed_priority=0.3, context_size=0.3,
+                          plan_weight=0.2, alias_state=state_before)
+        recheck = ms.recheck_required
+        has_meaning = any("alias_meaning_changed" in t
+                          for t in (ms.recheck_detail.triggers if ms.recheck_detail else []))
+        return [{"test": "usage_change_recheck", "recheck": recheck,
+                 "has_trigger": has_meaning, "pass": recheck and has_meaning}]
+    finally:
+        ModelSelector.update_alias_role("haiku", orig)
+
+
+# ── End-to-End Dynamic Verification (Goal 7) ─────────────────────────
+
+def test_ms_e2e_dynamic():
+    """Goal 7: Full dynamic end-to-end: classify → model select → capability select → handoff.
+    Tests 5 representative requests including one that requires recheck."""
+    advisor = AIAdvisor()
+    results = []
+
+    e2e_cases = [
+        # (request, expected_model_range, needs_recheck_scenario)
+        ("READMEのタイポを直してほしい",
+         "Simple/light task", ["haiku", "sonnet"], False),
+        ("GitHub Actionsの自動PRレビューを実装してほしい",
+         "Standard coding task", ["sonnet"], False),
+        ("マイクロサービス全体のアーキテクチャを設計してほしい",
+         "Complex/high-risk task", ["opus", "opusplan"], False),
+        ("マイクロサービス移行の全体設計を考えてほしい。アーキテクチャ方針を決めたい",
+         "Planning-heavy task", ["opusplan", "opus"], False),
+        # Recheck case: force context near limit
+        ("膨大なコンテキストを必要とする複雑なデバッグを直してほしい",
+         "Recheck case", ["sonnet", "opus", "opusplan"], False),
+    ]
+
+    for req, label, allowed_models, _ in e2e_cases:
+        # Full flow
+        cls = advisor.classify_request(req)
+        rc = cls["classification"]
+        ms = advisor.select_model(rc, req)
+        sel = advisor.select_capabilities(rc, req)
+        reason = advisor.generate_reason(rc, req, sel["selected"], sel["not_selected"])
+        ho = advisor.create_execution_handoff(rc, sel["selected"], model_selection=ms)
+
+        model_ok = ms.recommended_model in allowed_models
+        fallback_ok = ms.fallback_model in ("opus", "sonnet", "haiku", "opusplan")
+        handoff_model_ok = ho.get("model") is not None
+        pipeline_ok = all([
+            rc.startswith("RC-"),
+            len(sel["selected"]) > 0,
+            reason["has_all_3_elements"],
+            ho["has_5_elements"],
+            model_ok,
+            fallback_ok,
+            handoff_model_ok,
+        ])
+
+        results.append({
+            "label": label,
+            "request": req[:30],
+            "class": rc,
+            "model": ms.recommended_model,
+            "fallback": ms.fallback_model,
+            "recheck": ms.recheck_required,
+            "caps": len(sel["selected"]),
+            "handoff_model": handoff_model_ok,
+            "pass": pipeline_ok,
+        })
+
+    # Bonus: recheck scenario with env var change
+    import os
+    state_before = AliasState()
+    os.environ["ANTHROPIC_DEFAULT_SONNET_MODEL"] = "claude-sonnet-5-0"
+    try:
+        advisor_recheck = AIAdvisor(alias_state=state_before)
+        req = "GitHub Actionsの自動PRレビューを実装してほしい"
+        cls = advisor_recheck.classify_request(req)
+        rc = cls["classification"]
+        ms = advisor_recheck.select_model(rc, req)
+        sel = advisor_recheck.select_capabilities(rc, req)
+        ho = advisor_recheck.create_execution_handoff(rc, sel["selected"], model_selection=ms)
+
+        results.append({
+            "label": "Recheck scenario (env var change)",
+            "request": req[:30],
+            "class": rc,
+            "model": ms.recommended_model,
+            "recheck": ms.recheck_required,
+            "handoff_model": ho.get("model") is not None,
+            "pass": ms.recheck_required and ho.get("model") is not None,
+        })
+    finally:
+        os.environ.pop("ANTHROPIC_DEFAULT_SONNET_MODEL", None)
+
+    return results
+
+
+# ── Phase 6 Asset Coherence Tests (Goal 8) ───────────────────────────
+
+def test_ms_phase6_files_exist():
+    """Goal 8: Phase 6 deliverables exist and are non-trivial."""
+    required = [
+        "model_selector.py",
+        "01_model_selection_logic.md",
+    ]
+    results = []
+    for f in required:
+        p = PHASE6 / f
+        exists = p.exists()
+        sz = p.stat().st_size if exists else 0
+        results.append({"file": f, "exists": exists, "size": sz, "pass": exists and sz > 200})
+    return results
+
+
+def test_ms_rc_mapping_covers_all_classes():
+    """Goal 8: RC_TO_PARAMS covers all 6 request classifications."""
+    results = []
+    for rc in ["RC-1", "RC-2", "RC-3", "RC-4", "RC-5", "RC-6"]:
+        has = rc in RC_TO_PARAMS
+        results.append({"rc": rc, "pass": has})
+    return results
+
+
+def test_ms_no_version_pinning():
+    """Goal 8: No version-pinned strings in the selection logic."""
+    import inspect
+    source = inspect.getsource(ModelSelector.select)
+    version_patterns = ["claude-opus-4", "claude-sonnet-4", "claude-haiku-4",
+                        "claude-opus-5", "claude-sonnet-5"]
+    results = []
+    for pat in version_patterns:
+        found = pat in source
+        results.append({"pattern": pat, "found_in_select": found, "pass": not found})
+    return results
+
+
 # ── Main ───────────────────────────────────────────────────────────
 
 def run_all_tests():
     tests = [
         ("Phase 5 deliverable existence", test_file_existence),
         ("Request classification (6 classes)", test_request_classification),
-        # Goal 1
-        ("Goal 1: F-011 definition", test_goal1_f011_defined),
-        ("Goal 1: F-011 selected for scheduling", test_goal1_f011_selected_for_scheduling),
-        ("Goal 1: F-011 NOT selected when irrelevant", test_goal1_f011_not_selected_when_irrelevant),
-        # Goal 2
-        ("Goal 2: RC-6 different selections", test_goal2_same_class_different_selection_rc6),
-        ("Goal 2: RC-3 different selections", test_goal2_same_class_different_selection_rc3),
-        ("Goal 2: RC-1 different selections", test_goal2_same_class_different_selection_rc1),
-        ("Goal 2: Request-specific reasons", test_goal2_reason_is_request_specific),
-        # Goal 3
-        ("Goal 3: No T4 for irrelevant requests", test_goal3_no_t4_for_irrelevant_request),
-        ("Goal 3: T4 emitted when relevant", test_goal3_t4_emitted_when_relevant),
-        ("Goal 3: No T4 cross-contamination", test_goal3_t4_not_cross_contaminated),
-        # Existing
+        # Phase 5 Goal 1
+        ("P5 Goal 1: F-011 definition", test_goal1_f011_defined),
+        ("P5 Goal 1: F-011 selected for scheduling", test_goal1_f011_selected_for_scheduling),
+        ("P5 Goal 1: F-011 NOT selected when irrelevant", test_goal1_f011_not_selected_when_irrelevant),
+        # Phase 5 Goal 2
+        ("P5 Goal 2: RC-6 different selections", test_goal2_same_class_different_selection_rc6),
+        ("P5 Goal 2: RC-3 different selections", test_goal2_same_class_different_selection_rc3),
+        ("P5 Goal 2: RC-1 different selections", test_goal2_same_class_different_selection_rc1),
+        ("P5 Goal 2: Request-specific reasons", test_goal2_reason_is_request_specific),
+        # Phase 5 Goal 3
+        ("P5 Goal 3: No T4 for irrelevant requests", test_goal3_no_t4_for_irrelevant_request),
+        ("P5 Goal 3: T4 emitted when relevant", test_goal3_t4_emitted_when_relevant),
+        ("P5 Goal 3: No T4 cross-contamination", test_goal3_t4_not_cross_contaminated),
+        # Phase 5 Existing
         ("Reason generation (3 elements)", test_reason_generation),
         ("Execution handoff (5 elements)", test_execution_handoff),
         ("Update absorption (5 paths)", test_update_absorption),
-        ("End-to-end pipeline (3 requests)", test_end_to_end),
         ("Phase 4 integration", test_phase4_integration),
+        # ── Phase 6 Model Selection ──
+        ("P6: Simple → haiku", test_ms_simple_routes_haiku),
+        ("P6: Standard → sonnet", test_ms_standard_routes_sonnet),
+        ("P6: Complex → opus", test_ms_complex_routes_opus),
+        ("P6: Plan-heavy → opusplan", test_ms_plan_routes_opusplan),
+        ("P6: Fallback always present", test_ms_fallback_always_present),
+        ("P6: Output shape compliance", test_ms_output_shape),
+        # Phase 6 Goal 1: Canon recheck
+        ("P6 G1: No change → no recheck", test_ms_recheck_canon_no_change),
+        ("P6 G1: New alias → recheck", test_ms_recheck_canon_new_alias),
+        ("P6 G1: Role change → recheck", test_ms_recheck_canon_role_change),
+        ("P6 G1: Alias removed → recheck", test_ms_recheck_canon_alias_removed),
+        # Phase 6 Goal 2: Official recheck path
+        ("P6 G2: Official recheck path", test_ms_official_recheck_path_exists),
+        # Phase 6 Goal 3: Phase 5 integration
+        ("P6 G3: AIAdvisor.select_model exists", test_ms_phase5_advisor_has_select_model),
+        ("P6 G3: Classify→model select", test_ms_phase5_classify_then_select),
+        # Phase 6 Goal 4: Phase 4 handoff
+        ("P6 G4: Handoff carries model", test_ms_phase4_handoff_carries_model),
+        # Phase 6 Goal 6: Update robustness dynamic
+        ("P6 G6: New alias dynamic", test_ms_update_new_alias_dynamic),
+        ("P6 G6: Role change dynamic", test_ms_update_role_change_dynamic),
+        ("P6 G6: Version mapping dynamic", test_ms_update_version_mapping_dynamic),
+        ("P6 G6: Recommended usage change", test_ms_update_recommended_usage_change),
+        # Phase 6 Goal 7: End-to-end dynamic
+        ("P6 G7: E2E dynamic (6 scenarios)", test_ms_e2e_dynamic),
+        # Phase 6 Goal 8: Asset coherence
+        ("P6 G8: Phase 6 files exist", test_ms_phase6_files_exist),
+        ("P6 G8: RC mapping covers all", test_ms_rc_mapping_covers_all_classes),
+        ("P6 G8: No version pinning", test_ms_no_version_pinning),
+        # Integrated end-to-end (with model selection)
+        ("E2E pipeline (with model selection)", test_end_to_end),
     ]
 
     all_pass = True
