@@ -340,6 +340,118 @@ GitHub連携
 
 ---
 
+## フェーズ4準備状態インディケータ（Readiness Indicators）
+
+フェーズ5への移行を判定するための準備状態指標：
+
+### 必須準備完了判定
+
+| 指標 | 確認方法 | 合格基準 |
+|-----|--------|--------|
+| **7つの成果物完成** | `ls phase4_execution_foundation/0*.md` | 7ファイル全て存在・内容有 |
+| **Git同期状態** | `git status` | clean（未コミット変更なし） |
+| **リモート接続** | `git rev-parse origin/main` | 接続・更新可能 |
+| **コミット履歴** | `git log --oneline \| head -10` | Phase 4作業のコミット5件以上 |
+| **検証プログラム成功** | `python3 phase4_operational_verification.py` | Exit code 0 (全テスト PASS) |
+
+### フェーズ5移行判定
+
+```
+全指標が合格 → フェーズ5開始可能
+1つ以上不合格 → フェーズ4修正 → 再検証
+```
+
+---
+
+## フェーズ4→5 依存関係トレッキング（Dependency Tracking）
+
+### Phase 4資産がPhase 5に与える依存
+
+```
+フェーズ5での各種判定・実行
+  ↓
+必ず以下の フェーズ4資産 を参照
+  ├─ 01_execution_flow.md
+  │  └─ 7ステップワークフロー（各ステップの開始条件・終了条件）
+  │     → Phase 5: ステップ判定・進捗追跡に依存
+  │
+  ├─ 02_tool_maximization_policy.md
+  │  └─ D1/P1/P2候補一覧・優先順位
+  │     → Phase 5: ツール選定判定に依存
+  │
+  ├─ 03_new_tool_intake_rules.md
+  │  └─ 4段階評価フロー・採用判定ロジック
+  │     → Phase 5: 新規ツール発見時の判定に依存
+  │
+  ├─ 04_work_unit_definitions.md
+  │  └─ 5種類作業単位・開始終了条件・チェックリスト
+  │     → Phase 5: タスク単位化・粒度判定に依存
+  │
+  ├─ 05_quality_assurance_rules.md
+  │  └─ 4階層検証・完了条件・品質基準
+  │     → Phase 5: 実装検証・合否判定に依存
+  │
+  ├─ 06_github_integration_policy.md
+  │  └─ コミット形式・PR手順・マージ戦略
+  │     → Phase 5: GitHub操作・履歴記録に依存
+  │
+  └─ このファイル（07_phase5_handoff_memo.md）
+     └─ フェーズ4→5への接続設計・使用方法
+        → Phase 5: 全体フロー判定に依存
+```
+
+### 依存関係の強度
+
+| 依存元（Phase 5） | 依存先（Phase 4） | 強度 | 理由 |
+|-----------------|-----------------|------|------|
+| ステップ判定 | 01_execution_flow.md | 必須 | フロー進行の判定に不可欠 |
+| ツール選定 | 02_tool_maximization_policy.md | 必須 | P1→P2→試験の優先順位に依存 |
+| 新規ツール判定 | 03_new_tool_intake_rules.md | 必須 | 4段階フロー・タイムボックス判定に依存 |
+| タスク分割 | 04_work_unit_definitions.md | 必須 | 作業粒度・完了条件に依存 |
+| 品質検証 | 05_quality_assurance_rules.md | 必須 | PASS/FAIL判定・完了基準に依存 |
+| GitHub操作 | 06_github_integration_policy.md | 必須 | コミット・PR・push方法に依存 |
+
+### 逆方向の影響（Phase 5がPhase 4に与える影響）
+
+```
+Phase 5での実行結果
+  ↓
+フェーズ4成果物へのフィードバック
+  ├─ 新しいパターンが見つかった
+  │  → phase4_execution_foundation/*.md に追記/更新
+  │
+  ├─ ツール選定ルールの改善提案
+  │  → 02_tool_maximization_policy.md 更新
+  │
+  ├─ 新規ツールが評価済みになった
+  │  → 03_new_tool_intake_rules.md の試験採用結果を記録
+  │
+  └─ 品質基準の見直し
+     → 05_quality_assurance_rules.md 更新
+```
+
+### 依存性の検証（チェックリスト）
+
+```
+フェーズ4→5移行時の依存性確認:
+
+依存解析
+  [ ] 7つの成果物すべてが存在・内容がある
+  [ ] 各ファイル間の参照リンク（内部参照）が正しい
+  [ ] フェーズ2・3の成果物への外部参照が正しい
+  [ ] GitHub差分・コミット履歴が追跡可能
+
+運用確認
+  [ ] 実際に 01_execution_flow.md で段階判定ができた
+  [ ] 実際に 02_tool_maximization_policy.md でツール選定ができた
+  [ ] 実際に 04_work_unit_definitions.md でタスク分割ができた
+  [ ] 実際に 05_quality_assurance_rules.md で品質検証ができた
+
+→ すべてチェック後、依存性確認完了
+```
+
+---
+
 ## フェーズ5での最初の操作
 
 ### 初期化手順
@@ -357,7 +469,10 @@ cat 10.フェーズ4作業指示書.md | grep -A 10 "完了状態"
 # 4. 最新コミット確認
 git log -10 --oneline
 
-# 5. フェーズ5初期化スクリプト（あれば）実行
+# 5. 準備状態を検証（operational verification実行）
+python3 phase4_operational_verification.py
+
+# 6. フェーズ5初期化スクリプト（あれば）実行
 # bash scripts/phase5_init.sh
 ```
 
