@@ -27,10 +27,18 @@ RUNTIME_DIRS = [
     "phase1_information_foundation", "phase2_decision_foundation",
     "phase3_knowledge_foundation", "phase4_execution_foundation",
     "phase5_ai_advisor", "phase6_model_selection",
+    "layer7_execution_control", "layer8_quality_gates",
+    "layer9_connection_bootstrap", "layer10_watch_sync",
+    "layer11_continuous_eval",
 ]
 RUNTIME_SCRIPTS = [
     "phase5_operational_verification.py",
     "phase4_operational_verification.py",
+    "orchestrator.py",
+    "setup.py",
+    "proof_5layers.py",
+    "proof_e2e.py",
+    "proof_deploy.py",
 ]
 
 passed = 0
@@ -52,7 +60,7 @@ def section(title: str):
 
 
 def copy_package_to(dest: Path):
-    """Copy the unified package to a fresh directory."""
+    """Copy the unified package to a fresh directory (clean, no state)."""
     for subdir in RUNTIME_DIRS:
         src = PKG / subdir
         if src.exists():
@@ -62,6 +70,10 @@ def copy_package_to(dest: Path):
         src = PKG / script
         if src.exists():
             shutil.copy2(src, dest / script)
+    # Ensure no stale state is copied
+    state_dir = dest / ".orchestra_state"
+    if state_dir.exists():
+        shutil.rmtree(state_dir)
 
 
 def run_verification(cwd: Path) -> tuple[bool, str]:
@@ -74,6 +86,71 @@ def run_verification(cwd: Path) -> tuple[bool, str]:
     final = [l for l in lines if "FINAL:" in l]
     ok = r.returncode == 0 and any("ALL PASS" in l for l in final)
     return ok, (final[0].strip() if final else f"rc={r.returncode}")
+
+
+def run_orchestrator_status(cwd: Path) -> tuple[bool, str]:
+    """Run orchestrator.py --status and verify clean startup."""
+    r = subprocess.run(
+        [sys.executable, "orchestrator.py", "--status"],
+        cwd=str(cwd), capture_output=True, text=True, timeout=30,
+    )
+    if r.returncode != 0:
+        return False, f"rc={r.returncode} stderr={r.stderr[:200]}"
+    try:
+        data = json.loads(r.stdout)
+        records = data.get("evaluator", {}).get("records", -1)
+        hashes = data.get("watch_state", {}).get("known_hashes", -1)
+        ok = records == 0 and hashes == 0  # fresh state
+        return ok, f"records={records} hashes={hashes}"
+    except json.JSONDecodeError:
+        return False, "invalid JSON output"
+
+
+def run_orchestrator_request(cwd: Path, request: str) -> tuple[bool, str]:
+    """Run a real request through orchestrator and check outcome.
+
+    Acceptable outcomes:
+    - success: all actions passed
+    - partial: pipeline ran, some actions were environment-limited
+              (e.g. subagent timeout in test, no git repo)
+    - blocked_by_connections: explicit fail-fast on missing deps
+
+    NOT acceptable:
+    - failure: zero actions succeeded — pipeline is broken
+    - empty outcome: pipeline crashed
+    """
+    r = subprocess.run(
+        [sys.executable, "orchestrator.py", request],
+        cwd=str(cwd), capture_output=True, text=True, timeout=180,
+    )
+    if r.returncode != 0:
+        return False, f"rc={r.returncode} stderr={r.stderr[:200]}"
+    try:
+        data = json.loads(r.stdout)
+        outcome = data.get("outcome", "")
+        # The pipeline is operational if it completed classification, model
+        # selection, planning, and execution (even if some actions failed
+        # due to environment limits like no git repo or subagent timeout)
+        ok = outcome in ("success", "partial", "blocked_by_connections")
+        detail = f"outcome={outcome}"
+        if outcome == "partial":
+            exec_data = data.get("steps", {}).get("execution", {})
+            detail += f" succeeded={exec_data.get('succeeded', 0)}/{exec_data.get('total_actions', 0)}"
+        return ok, detail
+    except json.JSONDecodeError:
+        return False, "invalid JSON output"
+
+
+def run_phase4_verification(cwd: Path) -> tuple[bool, str]:
+    """Run phase4 verification."""
+    r = subprocess.run(
+        [sys.executable, "phase4_operational_verification.py"],
+        cwd=str(cwd), capture_output=True, text=True, timeout=60,
+    )
+    lines = r.stdout.strip().split("\n")
+    result_lines = [l for l in lines if "Result:" in l]
+    ok = r.returncode == 0
+    return ok, (result_lines[0].strip() if result_lines else f"rc={r.returncode}")
 
 
 # ── Proof 1: Real recheck path ──────────────────────────────────────
@@ -145,8 +222,28 @@ section("PROOF 3: Clean-environment reproducibility (temp copy)")
 with tempfile.TemporaryDirectory() as td:
     dest = Path(td) / "clean"
     copy_package_to(dest)
+
+    # 3a: Phase 5 brain verification
     ok, info = run_verification(dest)
-    proof("clean temp copy ALL PASS", ok, info)
+    proof("clean temp copy: Phase 5 ALL PASS", ok, info)
+
+    # 3b: No stale state in fresh copy
+    state_dir = dest / ".orchestra_state"
+    proof("clean temp copy: no stale .orchestra_state",
+          not state_dir.exists(),
+          "absent" if not state_dir.exists() else str(list(state_dir.iterdir())))
+
+    # 3c: Orchestrator --status starts clean
+    ok, info = run_orchestrator_status(dest)
+    proof("clean temp copy: orchestrator --status clean startup", ok, info)
+
+    # 3d: Phase 4 verification passes in fresh copy
+    ok, info = run_phase4_verification(dest)
+    proof("clean temp copy: Phase 4 verification", ok, info)
+
+    # 3e: Real request execution (investigation type — no external deps)
+    ok, info = run_orchestrator_request(dest, "現在のファイル一覧を調査してほしい")
+    proof("clean temp copy: real request execution", ok, info)
 
 # Also verify this package itself right now
 ok, info = run_verification(PKG)

@@ -1,19 +1,39 @@
 {
   "cycle": 0,
-  "timestamp": "2026-04-13T21:16:29.856310",
+  "timestamp": "2026-05-11T19:31:01.213406",
   "watch": {
-    "targets_checked": 5,
-    "changes_detected": 0,
-    "important_changes": 0,
-    "reeval_processed": 0
+    "targets_checked": 8,
+    "changes_detected": 5,
+    "important_changes": 1,
+    "reeval_processed": 1,
+    "catalog_update": {
+      "releases_checked": 5,
+      "new_capabilities": [
+        {
+          "id": "F-049",
+          "name": "/CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL",
+          "rcs": [
+            "RC-1",
+            "RC-3",
+            "RC-6"
+          ]
+        }
+      ],
+      "entries_added": 1
+    }
   },
   "improve": {
-    "applied": 0,
+    "applied": 2,
     "active_overrides": {
-      "version": 0,
-      "model_overrides": {},
+      "version": 342,
+      "model_overrides": {
+        "execution_issues_flagged": true,
+        "success_rate": 0.34,
+        "reasoning_boost": 0.2,
+        "direction": "upgrade_bias"
+      },
       "capability_overrides": {},
-      "applied_count": 0
+      "applied_count": 20
     }
   }
 }

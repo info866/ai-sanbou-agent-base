@@ -1,2 +1,4 @@
 *_RESULTS.json
 __pycache__/
+.orchestra_state/
+.claude/

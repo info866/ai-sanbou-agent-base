@@ -794,3 +794,204 @@
 - **first_seen_at**: 2026-04-12
 - **last_checked_at**: 2026-04-12
 - **notes**: 9,403 stars。MCP公式開発ツール。Phase 1では未発見。MCP開発・テストに不可欠な公式ツール。比較グループ: CG-04
+
+
+## セクション3｜自動検出候補（Layer 10 自動更新: 2026-04-17）
+
+---
+
+#### F-039 | /effort
+
+- **item_id**: F-039
+- **item_name**: /effort
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.111
+- **summary**: Claude Code v2.1.111: Claude Opus 4.7 xhigh is now available! Use /effort to tune speed vs. intelligence
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.111+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.111 で追加。
+
+---
+
+#### F-040 | Auto mode
+
+- **item_id**: F-040
+- **item_name**: Auto mode
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.111
+- **summary**: Claude Code v2.1.111: Auto mode is now available for Max subscribers when using Opus 4.7
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.111+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.111 で追加。
+
+---
+
+#### F-041 | xhigh
+
+- **item_id**: F-041
+- **item_name**: xhigh
+- **item_type**: 公式機能
+- **layer_category**: 推論層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.111
+- **summary**: Claude Code v2.1.111: Added xhigh effort level for Opus 4.7, sitting between high and max. Available via /effort, --effort, and the model picker; other models fall back to...
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.111+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.111 で追加。
+
+---
+
+#### F-042 | /less-permission-prompts
+
+- **item_id**: F-042
+- **item_name**: /less-permission-prompts
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.111
+- **summary**: Claude Code v2.1.111: Added /less-permission-prompts skill — scans transcripts for common read-only Bash and MCP tool calls and proposes a prioritized allowlist for...
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.111+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.111 で追加。
+
+---
+
+#### F-043 | /ultrareview
+
+- **item_id**: F-043
+- **item_name**: /ultrareview
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.111
+- **summary**: Claude Code v2.1.111: Added /ultrareview for running comprehensive code review in the cloud using parallel multi-agent analysis and critique — invoke with no arguments to...
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.111+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.111 で追加。
+
+---
+
+#### F-044 | Auto mode
+
+- **item_id**: F-044
+- **item_name**: Auto mode
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.111
+- **summary**: Claude Code v2.1.111: Auto mode no longer requires --enable-auto-mode
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.111+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.111 で追加。
+
+---
+
+#### F-045 | /tui
+
+- **item_id**: F-045
+- **item_name**: /tui
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.110
+- **summary**: Claude Code v2.1.110: Added /tui command and tui setting — run /tui fullscreen to switch to flicker-free rendering in the same conversation
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.110+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.110 で追加。
+
+---
+
+#### F-046 | push notification tool
+
+- **item_id**: F-046
+- **item_name**: push notification tool
+- **item_type**: 公式機能
+- **layer_category**: 接続層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.110
+- **summary**: Claude Code v2.1.110: Added push notification tool — Claude can send mobile push notifications when Remote Control and "Push when Claude decides" config are enabled
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.110+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.110 で追加。
+
+---
+
+#### F-047 | autoScrollEnabled
+
+- **item_id**: F-047
+- **item_name**: autoScrollEnabled
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.110
+- **summary**: Claude Code v2.1.110: Added autoScrollEnabled config to disable conversation auto-scroll in fullscreen mode
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.110+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.110 で追加。
+
+---
+
+#### F-048 | /FORCE_PROMPT_CACHING_5M
+
+- **item_id**: F-048
+- **item_name**: /FORCE_PROMPT_CACHING_5M
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.108
+- **summary**: Claude Code v2.1.108: Added ENABLEPROMPTCACHING1H env var to opt into 1-hour prompt cache TTL on API key, Bedrock, Vertex, and Foundry (ENABLEPROMPTCACHING1HBEDROCK is...
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.108+
+- **current_status**: 候補
+- **first_seen_at**: 2026-04-17
+- **last_checked_at**: 2026-04-17
+- **notes**: Layer 10 自動検出。リリース v2.1.108 で追加。
+
+---
+
+#### F-049 | /CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL
+
+- **item_id**: F-049
+- **item_name**: /CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL
+- **item_type**: 公式機能
+- **layer_category**: 実行層
+- **vendor_owner**: Anthropic
+- **source_url**: https://github.com/anthropics/claude-code/releases/tag/v2.1.136
+- **summary**: Claude Code v2.1.136: Added CLAUDECODEENABLEFEEDBACKSURVEYFOROTEL to re-enable the session quality survey for enterprises capturing responses through OpenTelemetry
+- **primary_use_cases**: Claude Code の新機能として自動検出。詳細はリリースノート参照。
+- **prerequisites**: Claude Code CLI v2.1.136+
+- **current_status**: 候補
+- **first_seen_at**: 2026-05-11
+- **last_checked_at**: 2026-05-11
+- **notes**: Layer 10 自動検出。リリース v2.1.136 で追加。

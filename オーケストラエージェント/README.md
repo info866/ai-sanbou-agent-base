@@ -16,17 +16,18 @@ AI参謀の統合判断・自動実行フレームワーク。Phase 1〜6の判�
 
 ### 手足（追加5層）
 - `layer7_execution_control/` — Phase 5橋渡し→自動実行計画変換・能力→アクション対応
-- `layer8_quality_gates/` — リスク検知・品質ゲート自動挿入・危険操作ブロック
+- `layer8_quality_gates/` — リスク検知・品質ゲート自動挿入・実検証コマンド実行・危険操作ブロック
 - `layer9_connection_bootstrap/` — MCP/API/GitHub/CLI接続の自動確認・不足検知
 - `layer10_watch_sync/` — 外部ソース監視・変更検知・重要度フィルタ・再評価トリガー
 - `layer11_continuous_eval/` — 実行結果計測・選定精度評価・改善提案フィードバック
 
 ### 検証・証明
 - `phase5_operational_verification.py` — 統合検証（110項目）
-- `phase4_operational_verification.py` — Phase 4検証（15項目）
+- `phase4_operational_verification.py` — Phase 4検証（15項目、fresh copy対応）
 - `phase6_model_selection/test_model_selector.py` — モデル選定単体検証（12項目）
-- `proof_final.py` — 最終証明（recheck/永続化/クリーン再現/故障注入、18項目）
+- `proof_final.py` — 最終証明（recheck/永続化/クリーン再現/orchestrator実行/故障注入）
 - `proof_5layers.py` — 追加5層証明（全層+統合パイプライン、48項目）
+- `proof_e2e.py` — E2Eパイプライン証明（実行・品質ゲート・接続・監視・評価、64項目）
 
 ## 検証
 
@@ -39,14 +40,14 @@ python3 phase5_operational_verification.py
 # 頭脳: Phase 6 単体検証（12項目）
 cd phase6_model_selection && python3 test_model_selector.py && cd ..
 
-# 頭脳: Phase 4 検証（15項目）
-python3 phase4_operational_verification.py
-
-# 頭脳: 最終証明（18項目）
-python3 proof_final.py
-
 # 手足: 追加5層証明（48項目）
 python3 proof_5layers.py
+
+# E2E: パイプライン全体証明（64項目）
+python3 proof_e2e.py
+
+# 最終証明: クリーン再現 + orchestrator実行 + 故障注入
+python3 proof_final.py
 ```
 
 ## 統合フロー
@@ -63,13 +64,69 @@ python3 proof_5layers.py
   → 実行結果評価（精度計測・改善提案）         [Layer 11]
 ```
 
-## 使い方
+## 使い方（Zero-Slash・ゼロセットアップ）
 
-このフォルダを新規プロジェクトにコピーするだけで使えます:
+**このフォルダをコピーして Claude Code で開くだけ** で動きます。`setup.py` もスラッシュコマンドも不要です。
+
+### 方法A: フォルダごとコピー（推奨・セットアップ不要）
 
 ```bash
-cp -r オーケストラエージェント/ your-project/オーケストラエージェント/
-cd your-project/オーケストラエージェント/
-python3 proof_5layers.py          # 追加5層動作確認
-python3 proof_final.py            # 頭脳動作確認
+cp -r AI統合オーケストラ/ your-project/
+cd your-project
+# → Claude Code で開く → 普通にテキストを入力するだけ
+```
+
+`.claude/settings.json` が同梱されており、フックは `$CLAUDE_PROJECT_DIR`（Claude Code が自動設定する環境変数）を使うため、**どこにコピーしても即座に動きます**。
+
+### 方法B: 既存プロジェクトにオーケストラだけ追加
+
+```bash
+cp -r オーケストラエージェント/ your-existing-project/オーケストラエージェント/
+cd your-existing-project
+python3 オーケストラエージェント/setup.py
+```
+
+`setup.py` は既存の `.claude/settings.json` にフックをマージします。
+
+### 利用（Claude Code 内）
+
+```
+GitHub Actionsの自動PRレビューを実装してほしい
+```
+
+それだけです。`/orchestrate` も `▶` も不要。送信するたびに classify → plan → execute → evaluate が走ります。
+
+スラッシュは引き続きオプションとして使えます:
+```
+/orchestrate 現在のファイル構造を調査してほしい
+/orchestra-status
+```
+
+### setup.py フラグ
+
+| フラグ | 動作 |
+|--------|------|
+| (なし) | SessionStart + UserPromptSubmit full-auto（既定） |
+| `--no-hook` / `--slash-only` | フックなし（スラッシュコマンドのみ） |
+
+### 前提条件
+
+| 依存 | 必須 | 用途 |
+|------|------|------|
+| Python 3.10+ | 必須 | オーケストレータ本体 |
+| git | 必須 | GitHub反映、差分確認 |
+| Claude Code CLI | 推奨 | サブエージェント。なければ deferred で続行 |
+| `gh` CLI + 認証 | 機能別 | GitHub Actions/PR。なければ `blocked_by_connections` で明示停止 |
+
+### 実行時の挙動
+
+- 接続に不足がある場合、**実行前に `blocked_by_connections` で明示停止**します
+- pytest 未インストール環境では機能検証ゲートがスキップされます
+- hook / slash_command は harness-only として deferred（Claude Code AI ランタイム内でのみ実行可能）
+
+### デプロイ検証
+
+```bash
+cd オーケストラエージェント/
+python3 proof_deploy.py    # コピー→セットアップ→実行の全フロー検証
 ```

@@ -3147,6 +3147,46 @@
       "duration_seconds": 0.0,
       "error_details": "",
       "created_at": "2026-05-11T23:39:30.525726"
+    },
+    {
+      "record_id": "orch-20260512-072243",
+      "classification": "RC-3",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-002",
+        "F-004"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-004"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-12T07:22:43.341416"
+    },
+    {
+      "record_id": "orch-20260512-072846",
+      "classification": "RC-5",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-002",
+        "F-009"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-009"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-12T07:28:46.206966"
     }
   ],
   "last_report": {

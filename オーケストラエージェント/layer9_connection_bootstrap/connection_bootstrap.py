@@ -48,6 +48,11 @@ class ConnectionHealth:
 
     @property
     def is_ok(self) -> bool:
+        return self.status == "healthy"
+
+    @property
+    def is_usable(self) -> bool:
+        """Degraded connections may work but are not fully verified."""
         return self.status in ("healthy", "degraded")
 
     def to_dict(self) -> dict:
@@ -223,6 +228,12 @@ class ConnectionBootstrap:
                 report.healthy += 1
             elif health.status == "degraded":
                 report.degraded += 1
+                # Degraded required connections are blocking —
+                # they exist but are not fully functional
+                if not req.optional:
+                    report.blocking_gaps.append(
+                        f"{req.name} ({req.conn_type}): degraded — {health.details}"
+                    )
             elif health.status == "missing":
                 report.missing += 1
                 if not req.optional:
@@ -243,9 +254,35 @@ class ConnectionBootstrap:
     def _check_cli(self, req: ConnectionRequirement) -> ConnectionHealth:
         hint = CAPABILITY_CONNECTIONS.get(req.required_by, [{}])
         hint_str = next((c.get("hint", "") for c in hint if c.get("target") == req.target), "")
-        if shutil.which(req.target):
-            return ConnectionHealth(req, "healthy", f"{req.target} found in PATH")
-        return ConnectionHealth(req, "missing", f"{req.target} not in PATH", hint_str)
+        path = shutil.which(req.target)
+        if not path:
+            return ConnectionHealth(req, "missing", f"{req.target} not in PATH", hint_str)
+
+        # For claude CLI, verify it's actually functional (not just in PATH)
+        if req.target == "claude":
+            try:
+                r = subprocess.run(
+                    [path, "--version"],
+                    capture_output=True, text=True, timeout=10,
+                )
+                if r.returncode == 0 and r.stdout.strip():
+                    return ConnectionHealth(
+                        req, "healthy",
+                        f"claude CLI v{r.stdout.strip()} functional",
+                    )
+                return ConnectionHealth(
+                    req, "degraded",
+                    f"claude CLI found but --version returned rc={r.returncode}",
+                    "Ensure Claude Code is properly installed and logged in",
+                )
+            except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+                return ConnectionHealth(
+                    req, "degraded",
+                    "claude CLI found in PATH but not responding",
+                    "Reinstall Claude Code CLI",
+                )
+
+        return ConnectionHealth(req, "healthy", f"{req.target} found in PATH")
 
     def _check_python_module(self, req: ConnectionRequirement) -> ConnectionHealth:
         try:
@@ -331,7 +368,7 @@ class ConnectionBootstrap:
 
         for health in check_report.results:
             if health.is_ok:
-                continue  # already working
+                continue  # fully healthy — no action needed
 
             req = health.requirement
             action = self._try_prepare(req, health)

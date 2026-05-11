@@ -16,6 +16,8 @@ Goal-specific proofs:
   Goal 3: T4 items appear only when request-relevant; irrelevant T4 suppressed
 """
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path

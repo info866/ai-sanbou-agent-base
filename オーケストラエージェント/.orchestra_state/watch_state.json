@@ -1,17 +1,23 @@
 {
   "last_checked": {
-    "Claude Code CLI": "2026-04-13T21:16:29.111528",
-    "Anthropic SDK Python": "2026-04-13T21:16:29.316908",
-    "MCP Specification": "2026-04-13T21:16:29.628693",
-    "promptfoo": "2026-04-13T21:16:29.854353",
-    "Claude Model Aliases": "2026-04-13T21:16:29.855165"
+    "Claude Code CLI": "2026-05-11T19:30:57.294297",
+    "Anthropic SDK Python": "2026-05-11T19:30:57.791553",
+    "MCP Specification": "2026-05-11T19:30:58.532388",
+    "promptfoo": "2026-05-11T19:30:58.844070",
+    "Claude Model Aliases": "2026-05-11T19:30:58.844804",
+    "OpenAI Codex": "2026-05-11T19:30:59.357310",
+    "Ruflo": "2026-05-11T19:30:59.657410",
+    "Claude Agent SDK Python": "2026-05-11T19:31:00.105470"
   },
   "known_hashes": {
-    "Claude Code CLI": "e0a7eec43d993e0f92f6bdfc7564a0669b2abd39e3cbfaa91185ff2ddb8af62f",
-    "Anthropic SDK Python": "38899a8b4ef4402fa5290f97c43b3a947dabda03ea458f0776dca4c7db7d6b01",
-    "MCP Specification": "a2c1c82fcb50146d9f2fa1b4181b3f16af1de3df71df85f9710c3002333ed4aa",
-    "promptfoo": "a48d27acfe5cab64d959997e0a0f1a01ddc152f50d9903ee3fcb0534d3ffc16c",
-    "Claude Model Aliases": "70d3069134ae081b170f7d5369cd820d426750518608b5758caa18017d69d761"
+    "Claude Code CLI": "b2cc7f15154632e9f02e9084802bbbaf6c0c51701ceeeddc8af32e93837b4dc2",
+    "Anthropic SDK Python": "a1056dad8f014557fdefc64971d4417013068f39281827411f1c6f14023b67cd",
+    "MCP Specification": "8007d9f8653bc6516f7177ae0cadd67c7b7ae0aa18127be5108f1c22dd0dcad7",
+    "promptfoo": "2b5a5aec275d56a8ec0895251280a7c782ac116979b092c94f2e340e7e7eb346",
+    "Claude Model Aliases": "332978a35dc10e9953ad543ca380e46f6d1ece58a6dcae84515eb2899aaef5d4",
+    "OpenAI Codex": "acc7996985389e5e35df2c4699a8272b808a1276eec9baf41934a71c327a8d2c",
+    "Ruflo": "c753b2708d8176cb8b4e391cdb15ebbcb46b366532e10b9698bc80fe10a9c9cc",
+    "Claude Agent SDK Python": "11cb655ea132268128a50e33d73a33713d5e6f71a25739c48399ef53ef9765df"
   },
   "pending_events": []
 }
