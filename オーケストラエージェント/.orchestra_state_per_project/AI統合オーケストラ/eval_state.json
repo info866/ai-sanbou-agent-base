@@ -1,0 +1,3194 @@
+{
+  "records": [
+    {
+      "record_id": "orch-20260416-123452",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T12:34:52.633646"
+    },
+    {
+      "record_id": "orch-20260416-124323",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T12:43:23.176270"
+    },
+    {
+      "record_id": "orch-20260416-125810",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T12:58:10.689082"
+    },
+    {
+      "record_id": "orch-20260416-130401",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T13:04:01.014330"
+    },
+    {
+      "record_id": "orch-20260416-130611",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T13:06:11.050621"
+    },
+    {
+      "record_id": "orch-20260416-132146",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T13:21:46.968189"
+    },
+    {
+      "record_id": "orch-20260416-133427",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T13:34:27.238064"
+    },
+    {
+      "record_id": "orch-20260416-160601",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T16:06:01.236905"
+    },
+    {
+      "record_id": "orch-20260416-161006",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T16:10:06.445168"
+    },
+    {
+      "record_id": "orch-20260416-164942",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T16:49:42.621778"
+    },
+    {
+      "record_id": "orch-20260416-164950",
+      "classification": "RC-6",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-010"
+      ],
+      "capabilities_recommended": [
+        "F-010"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T16:49:50.492769"
+    },
+    {
+      "record_id": "orch-20260416-183609",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T18:36:09.113678"
+    },
+    {
+      "record_id": "orch-20260416-183959",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T18:39:59.348491"
+    },
+    {
+      "record_id": "orch-20260416-185050",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T18:50:50.262600"
+    },
+    {
+      "record_id": "orch-20260416-190454",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T19:04:54.109466"
+    },
+    {
+      "record_id": "orch-20260416-194104",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T19:41:04.076654"
+    },
+    {
+      "record_id": "orch-20260416-194627",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T19:46:27.209928"
+    },
+    {
+      "record_id": "orch-20260416-201325",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:13:25.628065"
+    },
+    {
+      "record_id": "orch-20260416-201426",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:14:26.687739"
+    },
+    {
+      "record_id": "orch-20260416-201532",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:15:32.903000"
+    },
+    {
+      "record_id": "orch-20260416-201637",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:16:37.944397"
+    },
+    {
+      "record_id": "orch-20260416-201743",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:17:43.757749"
+    },
+    {
+      "record_id": "orch-20260416-201847",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:18:47.831761"
+    },
+    {
+      "record_id": "orch-20260416-201950",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:19:50.642318"
+    },
+    {
+      "record_id": "orch-20260416-202102",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:21:02.034242"
+    },
+    {
+      "record_id": "orch-20260416-202205",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:22:05.177866"
+    },
+    {
+      "record_id": "orch-20260416-202315",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:23:15.195741"
+    },
+    {
+      "record_id": "orch-20260416-202423",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:24:23.673652"
+    },
+    {
+      "record_id": "orch-20260416-202528",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:25:28.339163"
+    },
+    {
+      "record_id": "orch-20260416-202651",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:26:51.458843"
+    },
+    {
+      "record_id": "orch-20260416-202757",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:27:57.194718"
+    },
+    {
+      "record_id": "orch-20260416-202913",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:29:13.500703"
+    },
+    {
+      "record_id": "orch-20260416-203032",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:30:32.146801"
+    },
+    {
+      "record_id": "orch-20260416-203141",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:31:41.671179"
+    },
+    {
+      "record_id": "orch-20260416-203253",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:32:53.183016"
+    },
+    {
+      "record_id": "orch-20260416-203408",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:34:08.622040"
+    },
+    {
+      "record_id": "orch-20260416-203524",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:35:24.466425"
+    },
+    {
+      "record_id": "orch-20260416-203637",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:36:37.213654"
+    },
+    {
+      "record_id": "orch-20260416-203749",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:37:49.681093"
+    },
+    {
+      "record_id": "orch-20260416-203906",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:39:06.633235"
+    },
+    {
+      "record_id": "orch-20260416-204021",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:40:21.799362"
+    },
+    {
+      "record_id": "orch-20260416-204139",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:41:39.265056"
+    },
+    {
+      "record_id": "orch-20260416-204256",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:42:56.163369"
+    },
+    {
+      "record_id": "orch-20260416-204413",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:44:13.781413"
+    },
+    {
+      "record_id": "orch-20260416-204533",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:45:33.555327"
+    },
+    {
+      "record_id": "orch-20260416-204653",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:46:53.578013"
+    },
+    {
+      "record_id": "orch-20260416-204815",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:48:15.077611"
+    },
+    {
+      "record_id": "orch-20260416-204931",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:49:31.088937"
+    },
+    {
+      "record_id": "orch-20260416-205058",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:50:58.142829"
+    },
+    {
+      "record_id": "orch-20260416-205218",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:52:18.376662"
+    },
+    {
+      "record_id": "orch-20260416-205335",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:53:35.759995"
+    },
+    {
+      "record_id": "orch-20260416-205502",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:55:02.750854"
+    },
+    {
+      "record_id": "orch-20260416-205624",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:56:24.800209"
+    },
+    {
+      "record_id": "orch-20260416-205753",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:57:53.046509"
+    },
+    {
+      "record_id": "orch-20260416-205913",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T20:59:13.475532"
+    },
+    {
+      "record_id": "orch-20260416-210034",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:00:34.193681"
+    },
+    {
+      "record_id": "orch-20260416-210154",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:01:54.925189"
+    },
+    {
+      "record_id": "orch-20260416-210315",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:03:15.883416"
+    },
+    {
+      "record_id": "orch-20260416-210435",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:04:35.217201"
+    },
+    {
+      "record_id": "orch-20260416-210559",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:05:59.540363"
+    },
+    {
+      "record_id": "orch-20260416-210720",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:07:20.819857"
+    },
+    {
+      "record_id": "orch-20260416-210852",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:08:52.820835"
+    },
+    {
+      "record_id": "orch-20260416-211012",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:10:12.348702"
+    },
+    {
+      "record_id": "orch-20260416-211133",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:11:33.983726"
+    },
+    {
+      "record_id": "orch-20260416-211301",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:13:01.722868"
+    },
+    {
+      "record_id": "orch-20260416-211423",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:14:23.452272"
+    },
+    {
+      "record_id": "orch-20260416-211608",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:16:08.617419"
+    },
+    {
+      "record_id": "orch-20260416-211727",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:17:27.470540"
+    },
+    {
+      "record_id": "orch-20260416-211834",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:18:34.844607"
+    },
+    {
+      "record_id": "orch-20260416-212007",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:20:07.730080"
+    },
+    {
+      "record_id": "orch-20260416-212144",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:21:44.653101"
+    },
+    {
+      "record_id": "orch-20260416-212308",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:23:08.163782"
+    },
+    {
+      "record_id": "orch-20260416-212431",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:24:31.440583"
+    },
+    {
+      "record_id": "orch-20260416-212546",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:25:46.518052"
+    },
+    {
+      "record_id": "orch-20260416-212655",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:26:55.134321"
+    },
+    {
+      "record_id": "orch-20260416-212810",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:28:10.004578"
+    },
+    {
+      "record_id": "orch-20260416-212916",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:29:16.038745"
+    },
+    {
+      "record_id": "orch-20260416-213032",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:30:32.864533"
+    },
+    {
+      "record_id": "orch-20260416-213153",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:31:53.322284"
+    },
+    {
+      "record_id": "orch-20260416-213307",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:33:07.598524"
+    },
+    {
+      "record_id": "orch-20260416-213421",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:34:21.107398"
+    },
+    {
+      "record_id": "orch-20260416-213553",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:35:53.190905"
+    },
+    {
+      "record_id": "orch-20260416-213702",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:37:02.332438"
+    },
+    {
+      "record_id": "orch-20260416-213808",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:38:08.499695"
+    },
+    {
+      "record_id": "orch-20260416-213931",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:39:31.407374"
+    },
+    {
+      "record_id": "orch-20260416-214045",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:40:45.490898"
+    },
+    {
+      "record_id": "orch-20260416-214154",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:41:54.348887"
+    },
+    {
+      "record_id": "orch-20260416-214327",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:43:27.276825"
+    },
+    {
+      "record_id": "orch-20260416-214437",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:44:37.831728"
+    },
+    {
+      "record_id": "orch-20260416-214546",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T21:45:46.786299"
+    },
+    {
+      "record_id": "orch-20260416-231459",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:14:59.705929"
+    },
+    {
+      "record_id": "orch-20260416-231642",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:16:42.099644"
+    },
+    {
+      "record_id": "orch-20260416-231848",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:18:48.691214"
+    },
+    {
+      "record_id": "orch-20260416-232009",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:20:09.198135"
+    },
+    {
+      "record_id": "orch-20260416-232200",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:22:00.107361"
+    },
+    {
+      "record_id": "orch-20260416-232320",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:23:20.968895"
+    },
+    {
+      "record_id": "orch-20260416-232444",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:24:44.330296"
+    },
+    {
+      "record_id": "orch-20260416-232605",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:26:05.479753"
+    },
+    {
+      "record_id": "orch-20260416-232723",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:27:23.502588"
+    },
+    {
+      "record_id": "orch-20260416-232904",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:29:04.779592"
+    },
+    {
+      "record_id": "orch-20260416-233036",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:30:36.705385"
+    },
+    {
+      "record_id": "orch-20260416-233211",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:32:11.040721"
+    },
+    {
+      "record_id": "orch-20260416-233351",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:33:51.800569"
+    },
+    {
+      "record_id": "orch-20260416-233511",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:35:11.714004"
+    },
+    {
+      "record_id": "orch-20260416-233624",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:36:24.049588"
+    },
+    {
+      "record_id": "orch-20260416-233755",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:37:55.207986"
+    },
+    {
+      "record_id": "orch-20260416-233928",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:39:28.635245"
+    },
+    {
+      "record_id": "orch-20260416-234040",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:40:40.863958"
+    },
+    {
+      "record_id": "orch-20260416-234201",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:42:01.439301"
+    },
+    {
+      "record_id": "orch-20260416-234315",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:43:15.523499"
+    },
+    {
+      "record_id": "orch-20260416-234431",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:44:31.414457"
+    },
+    {
+      "record_id": "orch-20260416-234554",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:45:54.189861"
+    },
+    {
+      "record_id": "orch-20260416-234710",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:47:10.557604"
+    },
+    {
+      "record_id": "orch-20260416-234821",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:48:21.492032"
+    },
+    {
+      "record_id": "orch-20260416-234925",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:49:25.782117"
+    },
+    {
+      "record_id": "orch-20260416-235027",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:50:27.494370"
+    },
+    {
+      "record_id": "orch-20260416-235135",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:51:35.847725"
+    },
+    {
+      "record_id": "orch-20260416-235241",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:52:41.681018"
+    },
+    {
+      "record_id": "orch-20260416-235346",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:53:46.856656"
+    },
+    {
+      "record_id": "orch-20260416-235450",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:54:50.150447"
+    },
+    {
+      "record_id": "orch-20260416-235551",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:55:51.134008"
+    },
+    {
+      "record_id": "orch-20260416-235657",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:56:57.984856"
+    },
+    {
+      "record_id": "orch-20260416-235803",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:58:03.526724"
+    },
+    {
+      "record_id": "orch-20260416-235859",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-16T23:58:59.052446"
+    },
+    {
+      "record_id": "orch-20260417-075511",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T07:55:11.655922"
+    },
+    {
+      "record_id": "orch-20260417-075623",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T07:56:23.202911"
+    },
+    {
+      "record_id": "orch-20260417-075659",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T07:56:59.810664"
+    },
+    {
+      "record_id": "orch-20260417-075743",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T07:57:43.800751"
+    },
+    {
+      "record_id": "orch-20260417-075925",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T07:59:25.641828"
+    },
+    {
+      "record_id": "orch-20260417-080221",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T08:02:21.409773"
+    },
+    {
+      "record_id": "orch-20260417-080439",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T08:04:39.436454"
+    },
+    {
+      "record_id": "orch-20260417-081326",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T08:13:26.783247"
+    },
+    {
+      "record_id": "orch-20260417-090121",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T09:01:21.726070"
+    },
+    {
+      "record_id": "orch-20260417-090217",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T09:02:17.901995"
+    },
+    {
+      "record_id": "orch-20260417-090349",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T09:03:49.526583"
+    },
+    {
+      "record_id": "orch-20260417-090617",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T09:06:17.324821"
+    },
+    {
+      "record_id": "orch-20260417-090650",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T09:06:50.937684"
+    },
+    {
+      "record_id": "orch-20260417-172910",
+      "classification": "RC-2",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-025",
+        "F-032"
+      ],
+      "capabilities_recommended": [
+        "F-025",
+        "F-032"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:29:10.913882"
+    },
+    {
+      "record_id": "orch-20260417-174210",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:42:10.727761"
+    },
+    {
+      "record_id": "orch-20260417-174311",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:43:11.875602"
+    },
+    {
+      "record_id": "orch-20260417-174415",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:44:15.380247"
+    },
+    {
+      "record_id": "orch-20260417-174519",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:45:19.523377"
+    },
+    {
+      "record_id": "orch-20260417-174623",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:46:23.133761"
+    },
+    {
+      "record_id": "orch-20260417-174729",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:47:29.211622"
+    },
+    {
+      "record_id": "orch-20260417-174835",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:48:35.706201"
+    },
+    {
+      "record_id": "orch-20260417-174852",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:48:52.400646"
+    },
+    {
+      "record_id": "orch-20260417-175023",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003",
+        "F-025"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-025"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:50:23.152792"
+    },
+    {
+      "record_id": "orch-20260417-175438",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-17T17:54:38.022858"
+    },
+    {
+      "record_id": "orch-20260418-110239",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003",
+        "F-010"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-010"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-04-18T11:02:39.330344"
+    },
+    {
+      "record_id": "orch-20260511-180913",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T18:09:13.820204"
+    },
+    {
+      "record_id": "orch-20260511-181710",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T18:17:10.206618"
+    },
+    {
+      "record_id": "orch-20260511-182236",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T18:22:36.853423"
+    },
+    {
+      "record_id": "orch-20260511-182731",
+      "classification": "RC-1",
+      "model_used": "haiku",
+      "model_recommended": "haiku",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T18:27:31.754306"
+    },
+    {
+      "record_id": "orch-20260511-191515",
+      "classification": "AU-1",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-003",
+        "F-032"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-032"
+      ],
+      "outcome": "failure",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T19:15:15.244455"
+    },
+    {
+      "record_id": "orch-20260511-191601",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T19:16:01.749610"
+    },
+    {
+      "record_id": "orch-20260511-193056",
+      "classification": "AU-1",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-003",
+        "F-032"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-032"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T19:30:56.055956"
+    },
+    {
+      "record_id": "orch-20260511-195212",
+      "classification": "RC-6",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T19:52:12.885482"
+    },
+    {
+      "record_id": "orch-20260511-225300",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T22:53:00.046497"
+    },
+    {
+      "record_id": "orch-20260511-225801",
+      "classification": "AU-1",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-003",
+        "F-032"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-032"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T22:58:01.341029"
+    },
+    {
+      "record_id": "orch-20260511-225802",
+      "classification": "RC-3",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-002",
+        "F-004"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-004"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T22:58:02.496582"
+    },
+    {
+      "record_id": "orch-20260511-225832",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T22:58:32.534900"
+    },
+    {
+      "record_id": "orch-20260511-230709",
+      "classification": "RC-4",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:07:09.700480"
+    },
+    {
+      "record_id": "orch-20260511-230915",
+      "classification": "RC-3",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-002",
+        "F-004"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-004"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:09:15.989428"
+    },
+    {
+      "record_id": "orch-20260511-230938",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:09:38.183636"
+    },
+    {
+      "record_id": "orch-20260511-231122",
+      "classification": "RC-3",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-002",
+        "F-003",
+        "F-004",
+        "F-009"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-003",
+        "F-004",
+        "F-009"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:11:22.347572"
+    },
+    {
+      "record_id": "orch-20260511-231133",
+      "classification": "RC-3",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-002",
+        "F-004"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-004"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:11:33.310233"
+    },
+    {
+      "record_id": "orch-20260511-231208",
+      "classification": "RC-4",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-003"
+      ],
+      "capabilities_recommended": [
+        "F-003"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:12:08.249111"
+    },
+    {
+      "record_id": "orch-20260511-231330",
+      "classification": "RC-5",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-002",
+        "F-009"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-009"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:13:30.175982"
+    },
+    {
+      "record_id": "orch-20260511-231331",
+      "classification": "RC-6",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-010"
+      ],
+      "capabilities_recommended": [
+        "F-010"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:13:31.060402"
+    },
+    {
+      "record_id": "orch-20260511-231405",
+      "classification": "AU-1",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-003",
+        "F-032"
+      ],
+      "capabilities_recommended": [
+        "F-003",
+        "F-032"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:14:05.447602"
+    },
+    {
+      "record_id": "orch-20260511-232334",
+      "classification": "RC-5",
+      "model_used": "opus",
+      "model_recommended": "opus",
+      "capabilities_used": [
+        "F-002",
+        "F-009"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-009"
+      ],
+      "outcome": "partial",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:23:34.796828"
+    },
+    {
+      "record_id": "orch-20260511-233655",
+      "classification": "RC-3",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-002",
+        "F-004"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-004"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:36:55.627582"
+    },
+    {
+      "record_id": "orch-20260511-233930",
+      "classification": "RC-3",
+      "model_used": "sonnet",
+      "model_recommended": "sonnet",
+      "capabilities_used": [
+        "F-002",
+        "F-004"
+      ],
+      "capabilities_recommended": [
+        "F-002",
+        "F-004"
+      ],
+      "outcome": "success",
+      "quality_gate_passed": true,
+      "connection_issues": [],
+      "duration_seconds": 0.0,
+      "error_details": "",
+      "created_at": "2026-05-11T23:39:30.525726"
+    }
+  ],
+  "last_report": {
+    "period": "2026-04-16T23:40:40.863958 → 2026-05-11T19:52:12.885482",
+    "total_executions": 50,
+    "success_rate": 0.67,
+    "model_accuracy": {
+      "total": 50,
+      "correct": 49,
+      "accuracy": 0.98,
+      "efficiency": 1.0,
+      "overqualified": 0,
+      "underqualified": 1,
+      "mismatches": 0
+    },
+    "capability_accuracy": {
+      "total": 50,
+      "correct": 18,
+      "accuracy": 0.36,
+      "efficiency": 1.0,
+      "overqualified": 0,
+      "underqualified": 0,
+      "mismatches": 0
+    },
+    "proposals": [
+      {
+        "target": "execution_flow",
+        "action": "Review execution pipeline — success rate below 80%",
+        "reason": "Success rate: 67%",
+        "priority": "high",
+        "evidence": {
+          "success_rate": 0.67,
+          "total": 50
+        }
+      }
+    ],
+    "classification_stats": {
+      "RC-1": 43,
+      "RC-4": 3,
+      "RC-2": 1,
+      "AU-1": 2,
+      "RC-6": 1
+    }
+  }
+}

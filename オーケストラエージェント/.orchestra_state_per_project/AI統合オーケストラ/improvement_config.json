@@ -1,0 +1,210 @@
+{
+  "model_weight_overrides": {
+    "execution_issues_flagged": true,
+    "success_rate": 0.36,
+    "reasoning_boost": 0.2,
+    "direction": "upgrade_bias",
+    "rc_model_floor": {}
+  },
+  "capability_priority_overrides": {},
+  "applied_proposals": [
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 30%",
+      "applied_version": 325,
+      "timestamp": "2026-04-18T11:02:39.335538"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 30%",
+      "applied_version": 326,
+      "timestamp": "2026-04-18T11:02:39.336040"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 30%",
+      "applied_version": 327,
+      "timestamp": "2026-05-11T18:09:13.822982"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 30%",
+      "applied_version": 328,
+      "timestamp": "2026-05-11T18:09:13.823261"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 30%",
+      "applied_version": 329,
+      "timestamp": "2026-05-11T18:17:10.209355"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 30%",
+      "applied_version": 330,
+      "timestamp": "2026-05-11T18:17:10.209630"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 30%",
+      "applied_version": 331,
+      "timestamp": "2026-05-11T18:22:36.856339"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 30%",
+      "applied_version": 332,
+      "timestamp": "2026-05-11T18:22:36.856626"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 30%",
+      "applied_version": 333,
+      "timestamp": "2026-05-11T18:27:31.757069"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 30%",
+      "applied_version": 334,
+      "timestamp": "2026-05-11T18:27:31.757345"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 30%",
+      "applied_version": 335,
+      "timestamp": "2026-05-11T19:15:15.247366"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 30%",
+      "applied_version": 336,
+      "timestamp": "2026-05-11T19:15:15.247802"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 32%",
+      "applied_version": 337,
+      "timestamp": "2026-05-11T19:16:01.755167"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 32%",
+      "applied_version": 338,
+      "timestamp": "2026-05-11T19:16:01.755535"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 34%",
+      "applied_version": 339,
+      "timestamp": "2026-05-11T19:30:56.058944"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 34%",
+      "applied_version": 340,
+      "timestamp": "2026-05-11T19:30:56.059275"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 34%",
+      "applied_version": 341,
+      "timestamp": "2026-05-11T19:31:01.212414"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 34%",
+      "applied_version": 342,
+      "timestamp": "2026-05-11T19:31:01.212967"
+    },
+    {
+      "target": "model_selection",
+      "action": "Review Phase 6 scoring weights — accuracy below 70%",
+      "reason": "Model accuracy: 36%",
+      "applied_version": 343,
+      "timestamp": "2026-05-11T19:52:12.888486"
+    },
+    {
+      "target": "execution_flow",
+      "action": "Review execution pipeline — success rate below 80%",
+      "reason": "Success rate: 36%",
+      "applied_version": 344,
+      "timestamp": "2026-05-11T19:52:12.888794"
+    }
+  ],
+  "rollback_snapshots": [
+    {
+      "version": 339,
+      "model_weight_overrides": {
+        "execution_issues_flagged": true,
+        "success_rate": 0.32,
+        "reasoning_boost": 0.15000000000000002,
+        "direction": "upgrade_bias"
+      },
+      "capability_priority_overrides": {},
+      "timestamp": "2026-05-11T19:30:56.059272"
+    },
+    {
+      "version": 340,
+      "model_weight_overrides": {
+        "execution_issues_flagged": true,
+        "success_rate": 0.34,
+        "reasoning_boost": 0.15000000000000002,
+        "direction": "upgrade_bias"
+      },
+      "capability_priority_overrides": {},
+      "timestamp": "2026-05-11T19:31:01.212402"
+    },
+    {
+      "version": 341,
+      "model_weight_overrides": {
+        "execution_issues_flagged": true,
+        "success_rate": 0.34,
+        "reasoning_boost": 0.2,
+        "direction": "upgrade_bias"
+      },
+      "capability_priority_overrides": {},
+      "timestamp": "2026-05-11T19:31:01.212962"
+    },
+    {
+      "version": 342,
+      "model_weight_overrides": {
+        "execution_issues_flagged": true,
+        "success_rate": 0.34,
+        "reasoning_boost": 0.2,
+        "direction": "upgrade_bias"
+      },
+      "capability_priority_overrides": {},
+      "timestamp": "2026-05-11T19:52:12.888479"
+    },
+    {
+      "version": 343,
+      "model_weight_overrides": {
+        "execution_issues_flagged": true,
+        "success_rate": 0.34,
+        "reasoning_boost": 0.2,
+        "direction": "upgrade_bias"
+      },
+      "capability_priority_overrides": {},
+      "timestamp": "2026-05-11T19:52:12.888791"
+    }
+  ],
+  "version": 344
+}

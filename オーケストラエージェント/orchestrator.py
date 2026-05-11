@@ -15,12 +15,42 @@ Usage:
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 
 PKG = Path(__file__).parent
+
+# ── Per-project state isolation ─────────────────────────────────────
+# Knowledge that's globally relevant lives in SHARED_STATE_DIR.
+# Project-specific learning (eval records, learned floors) is isolated
+# under PER_PROJECT_STATE_ROOT/<project>/ to prevent cross-contamination.
+
+PROJECT_PARENT_ROOTS = [
+    Path.home() / "プログラム開発",
+    Path.home() / "workspace",
+]
+
+
+def detect_project_name(user_cwd: Path | None) -> str:
+    """cwd → project name. Returns '_default' if outside known parents."""
+    if user_cwd is None:
+        return "_default"
+    try:
+        resolved = user_cwd.resolve()
+    except OSError:
+        return "_default"
+    for parent in PROJECT_PARENT_ROOTS:
+        try:
+            parent_resolved = parent.resolve()
+            rel = resolved.relative_to(parent_resolved)
+            if rel.parts:
+                return rel.parts[0]
+        except (ValueError, OSError):
+            continue
+    return "_default"
 
 # Add all layer paths
 for subdir in ["phase6_model_selection", "layer7_execution_control",
@@ -41,39 +71,69 @@ from evaluation_engine import (
 )
 from model_selector import ModelSelector, rc_to_model_input
 
-STATE_DIR = PKG / ".orchestra_state"
+SHARED_STATE_DIR = PKG / ".orchestra_state"
+PER_PROJECT_STATE_ROOT = PKG / ".orchestra_state_per_project"
+
+# Legacy alias — kept for any external references.
+STATE_DIR = SHARED_STATE_DIR
 
 
 class Orchestrator:
-    """Full pipeline coordinator with closed feedback loops."""
+    """Full pipeline coordinator with closed feedback loops.
 
-    def __init__(self, project_root: Path | None = None):
+    State layout (hybrid isolation):
+      - SHARED_STATE_DIR:        watch/releases/capabilities (global knowledge)
+      - project_state_dir:       eval/improvement/conn-cache (per-project learning)
+    """
+
+    def __init__(self, project_root: Path | None = None,
+                 user_cwd: Path | None = None):
         self.project_root = (project_root or PKG).resolve()
-        STATE_DIR.mkdir(exist_ok=True)
 
-        dyn_actions = load_dynamic_actions(STATE_DIR)
+        # Resolve user_cwd from env if not explicitly passed (hook sets this)
+        if user_cwd is None:
+            env_cwd = os.environ.get("ORCHESTRA_USER_CWD", "")
+            if env_cwd:
+                try:
+                    user_cwd = Path(env_cwd)
+                except Exception:
+                    user_cwd = None
+
+        # Set up the two-tier state directories
+        SHARED_STATE_DIR.mkdir(exist_ok=True)
+        self.shared_state_dir = SHARED_STATE_DIR
+        self.project_name = detect_project_name(user_cwd)
+        if self.project_name == "_default":
+            self.project_state_dir = SHARED_STATE_DIR
+        else:
+            self.project_state_dir = PER_PROJECT_STATE_ROOT / self.project_name
+            self.project_state_dir.mkdir(parents=True, exist_ok=True)
+
+        dyn_actions = load_dynamic_actions(self.shared_state_dir)
         self.controller = ExecutionController(dynamic_actions=dyn_actions)
         self.dispatcher = ActionDispatcher(project_root=self.project_root)
         self.gate_engine = QualityGateEngine()
         self.bootstrap = ConnectionBootstrap(project_root=self.project_root)
 
+        # Shared state engines (global knowledge)
         self.watch_engine = WatchSyncEngine(
-            state_path=STATE_DIR / "watch_state.json",
+            state_path=self.shared_state_dir / "watch_state.json",
         )
-        self.evaluator = EvaluationEngine(
-            state_path=STATE_DIR / "eval_state.json",
-        )
-        self.improvement_loop = ImprovementLoop(
-            config_path=STATE_DIR / "improvement_config.json",
-            evaluator=self.evaluator,
-        )
-        self._runtime = detect_runtime()
-
-        # Dynamic capability discovery
         self.catalog_updater = CatalogUpdater(
-            state_dir=STATE_DIR,
+            state_dir=self.shared_state_dir,
             catalog_path=PKG / "phase1_information_foundation" / "02_candidate_catalog.md",
         )
+
+        # Per-project engines (project-specific learning)
+        self.evaluator = EvaluationEngine(
+            state_path=self.project_state_dir / "eval_state.json",
+        )
+        self.improvement_loop = ImprovementLoop(
+            config_path=self.project_state_dir / "improvement_config.json",
+            evaluator=self.evaluator,
+        )
+
+        self._runtime = detect_runtime()
         self._dynamic_caps = self.catalog_updater.get_dynamic_capabilities()
 
     def run(self, request: str) -> dict:
@@ -219,7 +279,7 @@ class Orchestrator:
     _IMPROVEMENT_TTL_SECONDS = 86400  # 24 hours
 
     def _improvement_ttl_expired(self) -> bool:
-        p = STATE_DIR / "last_improvement_cycle.json"
+        p = self.project_state_dir / "last_improvement_cycle.json"
         if not p.exists():
             return True
         try:
@@ -229,7 +289,7 @@ class Orchestrator:
             return True
 
     def _improvement_ttl_mark(self) -> None:
-        p = STATE_DIR / "last_improvement_cycle.json"
+        p = self.project_state_dir / "last_improvement_cycle.json"
         p.write_text(json.dumps({"ts": datetime.now().isoformat()}))
 
     def watch_cycle(self) -> dict:
@@ -281,7 +341,7 @@ class Orchestrator:
                 "cycle": cycles, "timestamp": datetime.now().isoformat(),
                 "watch": watch, "improve": improve,
             }
-            (STATE_DIR / "last_continuous_cycle.json").write_text(
+            (self.shared_state_dir / "last_continuous_cycle.json").write_text(
                 json.dumps(status, indent=2, ensure_ascii=False, default=str),
             )
             cycles += 1
@@ -293,7 +353,9 @@ class Orchestrator:
         dyn_caps = self._dynamic_caps.get("capabilities", [])
         return {
             "runtime": self._runtime,
-            "state_dir": str(STATE_DIR),
+            "project": self.project_name,
+            "shared_state_dir": str(self.shared_state_dir),
+            "project_state_dir": str(self.project_state_dir),
             "watch_state": {
                 "targets": len(self.watch_engine.targets),
                 "known_hashes": len(self.watch_engine.state.known_hashes),
@@ -317,7 +379,7 @@ class Orchestrator:
 
     def _conn_cache_get(self) -> bool | None:
         """Return cached ready-state (True/False) or None if cache miss/expired."""
-        p = STATE_DIR / "conn_check_cache.json"
+        p = self.project_state_dir / "conn_check_cache.json"
         if not p.exists():
             return None
         try:
@@ -330,7 +392,7 @@ class Orchestrator:
         return None
 
     def _conn_cache_set(self, ready: bool) -> None:
-        p = STATE_DIR / "conn_check_cache.json"
+        p = self.project_state_dir / "conn_check_cache.json"
         p.write_text(json.dumps({"ts": datetime.now().isoformat(), "ready": ready}))
 
     def _classify(self, request: str) -> str:
