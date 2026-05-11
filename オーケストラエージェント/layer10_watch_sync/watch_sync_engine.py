@@ -18,10 +18,37 @@ from __future__ import annotations
 
 import json
 import hashlib
+import os
+import tempfile
 from dataclasses import dataclass, field, asdict
 from typing import Literal, Optional
 from datetime import datetime
 from pathlib import Path
+
+
+def _atomic_save(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _safe_load(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 ChangeType = Literal["new_feature", "update", "breaking_change", "deprecation", "security"]
@@ -65,21 +92,17 @@ class WatchState:
     pending_events: list[dict] = field(default_factory=list)
 
     def save(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        data = {
+        _atomic_save(path, {
             "last_checked": self.last_checked,
             "known_hashes": self.known_hashes,
             "pending_events": self.pending_events,
-        }
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        })
 
     @classmethod
     def load(cls, path: Path) -> "WatchState":
-        if not path.exists():
+        data = _safe_load(path)
+        if data is None:
             return cls()
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
         return cls(
             last_checked=data.get("last_checked", {}),
             known_hashes=data.get("known_hashes", {}),
@@ -148,6 +171,30 @@ DEFAULT_WATCH_TARGETS = [
         check_interval_hours=24,
         importance_threshold="critical",
         related_capabilities=[],
+    ),
+    WatchTarget(
+        name="OpenAI Codex",
+        source_type="github_repo",
+        url_or_id="openai/codex",
+        check_interval_hours=24,
+        importance_threshold="high",
+        related_capabilities=["F-003", "F-009"],
+    ),
+    WatchTarget(
+        name="Ruflo",
+        source_type="github_repo",
+        url_or_id="ruvnet/ruflo",
+        check_interval_hours=24,
+        importance_threshold="high",
+        related_capabilities=["F-003", "F-019"],
+    ),
+    WatchTarget(
+        name="Claude Agent SDK Python",
+        source_type="github_repo",
+        url_or_id="anthropics/claude-agent-sdk-python",
+        check_interval_hours=24,
+        importance_threshold="high",
+        related_capabilities=["F-009", "F-015"],
     ),
 ]
 

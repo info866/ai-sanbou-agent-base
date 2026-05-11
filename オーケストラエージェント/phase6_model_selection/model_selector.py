@@ -19,11 +19,38 @@ Recheck logic follows canon update-sensitive conditions:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import tempfile
 from dataclasses import dataclass, field, asdict
 from typing import Literal, Optional
 from datetime import datetime
 from pathlib import Path
+
+
+def _atomic_save(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _safe_load(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 ModelAlias = Literal["opus", "sonnet", "haiku", "opusplan"]
@@ -77,30 +104,25 @@ class AliasState:
 
     def save(self, path: Path) -> None:
         """Persist state to disk for cross-session change detection."""
-        data = {
+        _atomic_save(path, {
             "known_aliases": sorted(self.known_aliases),
             "alias_roles": self.alias_roles,
             "env_mappings": self.env_mappings,
             "last_checked": self.last_checked or datetime.now().isoformat(),
-        }
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        })
 
     @classmethod
     def load(cls, path: Path) -> "AliasState":
-        """Load persisted state. Returns fresh state if file missing."""
-        if not path.exists():
+        """Load persisted state. Returns fresh state if file missing/corrupt."""
+        data = _safe_load(path)
+        if data is None:
             return cls()
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
-        state = cls(
+        return cls(
             known_aliases=set(data.get("known_aliases", [])),
             alias_roles=data.get("alias_roles", {}),
             env_mappings=data.get("env_mappings", {}),
             last_checked=data.get("last_checked"),
         )
-        return state
 
     @classmethod
     def snapshot_current(cls) -> "AliasState":
@@ -479,29 +501,33 @@ class ModelSelector:
 # Default parameter sets per request classification
 # These connect Phase 5 RC-1~RC-6 to Phase 6 model selection input
 RC_TO_PARAMS: dict[str, dict] = {
-    "RC-1": {  # 調査中心: simple, fast
-        "reasoning_weight": 0.2, "ambiguity": 0.2, "failure_cost": 0.1,
-        "speed_priority": 0.7, "context_size": 0.2, "plan_weight": 0.1,
+    "RC-1": {  # 調査・確認 → sonnet (balanced research)
+        "reasoning_weight": 0.5, "ambiguity": 0.3, "failure_cost": 0.3,
+        "speed_priority": 0.3, "context_size": 0.4, "plan_weight": 0.2,
     },
-    "RC-2": {  # 比較中心: moderate reasoning
-        "reasoning_weight": 0.5, "ambiguity": 0.4, "failure_cost": 0.3,
+    "RC-2": {  # 比較・選定 → sonnet
+        "reasoning_weight": 0.5, "ambiguity": 0.4, "failure_cost": 0.4,
         "speed_priority": 0.2, "context_size": 0.4, "plan_weight": 0.3,
     },
-    "RC-3": {  # 実装中心: standard coding
+    "RC-3": {  # 構築・実装 → sonnet (standard coding)
         "reasoning_weight": 0.5, "ambiguity": 0.3, "failure_cost": 0.4,
         "speed_priority": 0.3, "context_size": 0.4, "plan_weight": 0.2,
     },
-    "RC-4": {  # 修正中心: moderate, speed matters
-        "reasoning_weight": 0.4, "ambiguity": 0.3, "failure_cost": 0.5,
-        "speed_priority": 0.4, "context_size": 0.3, "plan_weight": 0.1,
+    "RC-4": {  # 修正・バグ修正 → sonnet (existing-code understanding + fix)
+        "reasoning_weight": 0.5, "ambiguity": 0.4, "failure_cost": 0.5,
+        "speed_priority": 0.3, "context_size": 0.4, "plan_weight": 0.2,
     },
-    "RC-5": {  # 設計中心: heavy reasoning, planning
-        "reasoning_weight": 0.8, "ambiguity": 0.6, "failure_cost": 0.7,
-        "speed_priority": 0.1, "context_size": 0.5, "plan_weight": 0.8,
+    "RC-5": {  # 設計・アーキテクチャ → opus (deep system thinking)
+        "reasoning_weight": 0.9, "ambiguity": 0.6, "failure_cost": 0.8,
+        "speed_priority": 0.1, "context_size": 0.5, "plan_weight": 0.5,
     },
-    "RC-6": {  # 運用改善中心: moderate
-        "reasoning_weight": 0.4, "ambiguity": 0.3, "failure_cost": 0.3,
-        "speed_priority": 0.4, "context_size": 0.3, "plan_weight": 0.2,
+    "RC-6": {  # 自動化・効率化 → sonnet (standard workflow building)
+        "reasoning_weight": 0.5, "ambiguity": 0.3, "failure_cost": 0.4,
+        "speed_priority": 0.3, "context_size": 0.4, "plan_weight": 0.3,
+    },
+    "AU-1": {  # 監査・独立検証 → opus (adversarial deep analysis)
+        "reasoning_weight": 0.9, "ambiguity": 0.7, "failure_cost": 0.9,
+        "speed_priority": 0.0, "context_size": 0.6, "plan_weight": 0.4,
     },
 }
 

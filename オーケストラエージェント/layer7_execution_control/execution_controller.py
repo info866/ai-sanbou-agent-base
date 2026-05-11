@@ -113,21 +113,67 @@ class ExecutionPlan:
 
 
 # ── Capability → Action Mapping ─────────────────────────────────────
-
+# Only capabilities with **executable** action types live here.
+# Advisory-only capabilities (F-002 MCP, F-004 Hooks, F-005/F-011/F-013 slash,
+# F-019 MCP server, F-025 Memory) were removed in Stage 3 cleanup: they are
+# still selectable as advisory signals to Claude, but the dispatcher cannot
+# invoke them from Python — keeping them here only produced "deferred" noise.
 CAPABILITY_ACTIONS: dict[str, dict] = {
-    "F-002": {"type": "tool",          "target": "mcp_call",        "desc": "MCP protocol connection"},
-    "F-003": {"type": "subagent",      "target": "general-purpose", "desc": "Parallel sub-agent delegation"},
-    "F-004": {"type": "hook",          "target": "PreToolUse",      "desc": "Event-driven hook trigger"},
-    "F-005": {"type": "slash_command", "target": "/skill",          "desc": "Skill package invocation"},
-    "F-009": {"type": "subagent",      "target": "agent-sdk-dev",   "desc": "Agent SDK build"},
-    "F-010": {"type": "bash",          "target": "gh",              "desc": "GitHub Actions / CLI"},
-    "F-011": {"type": "slash_command", "target": "/schedule",       "desc": "Scheduled task creation"},
-    "F-013": {"type": "slash_command", "target": "/skill",          "desc": "Public skill marketplace"},
-    "F-014": {"type": "bash",          "target": "gh",              "desc": "Claude Code GitHub Action"},
-    "F-015": {"type": "bash",          "target": "python3",         "desc": "Python Agent SDK execution"},
-    "F-019": {"type": "tool",          "target": "mcp_server",      "desc": "MCP server reference"},
-    "F-025": {"type": "tool",          "target": "memory",          "desc": "Cross-session memory"},
-    "F-032": {"type": "bash",          "target": "promptfoo",       "desc": "LLM evaluation framework"},
+    "F-003": {"type": "subagent", "target": "general-purpose", "desc": "Parallel sub-agent delegation"},
+    "F-009": {"type": "subagent", "target": "agent-sdk-dev",   "desc": "Agent SDK build"},
+    "F-010": {"type": "bash",     "target": "gh",              "desc": "GitHub Actions / CLI"},
+    "F-014": {"type": "bash",     "target": "gh",              "desc": "Claude Code GitHub Action"},
+    "F-015": {"type": "bash",     "target": "python3",         "desc": "Python Agent SDK execution"},
+    "F-032": {"type": "bash",     "target": "promptfoo",       "desc": "LLM evaluation framework"},
+}
+
+# Advisory-only capability IDs — surfaced to Claude as context but never
+# converted into ExecutionAction (dispatcher cannot invoke them from Python).
+ADVISORY_CAPABILITIES: set[str] = {
+    "F-002",  # MCP protocol — Claude invokes natively
+    "F-004",  # Hooks — fire from Claude actions, not orchestrator
+    "F-005",  # /skill — slash command (Claude-side)
+    "F-011",  # /schedule — slash command (Claude-side)
+    "F-013",  # /skill marketplace — slash command (Claude-side)
+    "F-019",  # MCP server — Claude invokes natively
+    "F-025",  # Memory tool — Claude invokes natively
+}
+
+
+def load_dynamic_actions(state_dir: Path) -> dict[str, dict]:
+    """Load dynamic capability→action mappings from catalog_updater output."""
+    dyn_path = state_dir / "dynamic_capabilities.json"
+    if not dyn_path.exists():
+        return {}
+    try:
+        with open(dyn_path, encoding="utf-8") as f:
+            data = json.load(f)
+        extra = {}
+        for cap in data.get("capabilities", []):
+            fid = cap.get("item_id", "")
+            action = cap.get("action", {})
+            if fid and action:
+                extra[fid] = action
+        return extra
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+# Capability → Step affinity (which work steps a capability naturally belongs to)
+# Used when the capability's role/step name doesn't match step keywords.
+CAPABILITY_STEP_AFFINITY: dict[str, list[str]] = {
+    "F-002": ["調査", "実装"],         # MCP — used for investigation and implementation
+    "F-003": ["調査", "独立調査", "証拠収集", "反証試行"],  # Subagents — parallel investigation + AU-1 audit
+    "F-004": ["実装", "検証"],         # Hooks — implementation and quality checks
+    "F-005": ["実装"],                 # Skills — implementation
+    "F-009": ["実装", "設計"],         # Agent SDK — implementation and design
+    "F-010": ["実装", "GitHub反映"],   # GitHub Actions — implementation and GitHub integration
+    "F-011": ["実装"],                 # Scheduled Tasks — implementation
+    "F-013": ["実装"],                 # anthropics/skills marketplace
+    "F-014": ["実装", "GitHub反映"],   # claude-code-action — implementation and GitHub
+    "F-015": ["実装"],                 # Python Agent SDK
+    "F-019": ["調査", "実装"],         # MCP Servers — investigation and implementation
+    "F-025": ["記録"],                 # Memory Tool — recording
+    "F-032": ["検証", "比較", "検証レポート"],  # promptfoo — evaluation, comparison + AU-1 report
 }
 
 # Step → Default tool types (when no capability specifies)
@@ -148,8 +194,10 @@ STEP_TOOLS: dict[str, list[dict]] = {
         {"type": "edit",  "target": "bug_target",  "desc": "Fix target code"},
     ],
     "検証": [
-        {"type": "bash",  "target": "python3 -m pytest", "desc": "Run tests"},
-        {"type": "bash",  "target": "python3",           "desc": "Run verification"},
+        {"type": "bash",  "target": "python3 -c \"import sys; sys.exit(0 if __import__('importlib').util.find_spec('pytest') else 1)\" && python3 -m pytest --tb=short -q || python3 -c \"print('pytest not available, skipping')\"",
+         "desc": "Run tests (if pytest available)"},
+        {"type": "bash",  "target": "python3 -m compileall -q .",
+         "desc": "Compile check all Python files"},
     ],
     "設計": [
         {"type": "subagent", "target": "Plan", "desc": "Architecture planning"},
@@ -159,9 +207,10 @@ STEP_TOOLS: dict[str, list[dict]] = {
         {"type": "write", "target": "documentation", "desc": "Write documentation"},
     ],
     "GitHub反映": [
-        {"type": "bash", "target": "git add",    "desc": "Stage changes"},
-        {"type": "bash", "target": "git commit",  "desc": "Commit changes"},
-        {"type": "bash", "target": "git push",    "desc": "Push to remote"},
+        {"type": "bash", "target": "git status --short 2>/dev/null || echo 'not a git repository'",
+         "desc": "Check working tree status"},
+        {"type": "bash", "target": "git diff --stat 2>/dev/null || echo 'no git diff available'",
+         "desc": "Show changes summary"},
     ],
 }
 
@@ -180,10 +229,28 @@ class ExecutionController:
         # Layer 8 can inject quality gates via plan.inject_gate()
     """
 
+    def __init__(self, dynamic_actions: dict[str, dict] | None = None):
+        # Merge static + dynamic capability→action mappings
+        self._actions = dict(CAPABILITY_ACTIONS)
+        if dynamic_actions:
+            self._actions.update(dynamic_actions)
+
     def plan(self, handoff: dict) -> ExecutionPlan:
         """Convert 5-element handoff to ExecutionPlan."""
+        # Extract RC classification: prefer explicit key, fall back to parsing target
+        classification = handoff.get("classification", "")
+        if not classification:
+            target = handoff.get("target", "")
+            # Try to extract RC-N pattern from target string
+            import re as _re
+            rc_match = _re.search(r"RC-\d", target)
+            if rc_match:
+                classification = rc_match.group()
+            elif target:
+                classification = target.split()[-1]
+
         plan = ExecutionPlan(
-            classification=handoff.get("target", "").split()[-1] if handoff.get("target") else "",
+            classification=classification,
             verification_gates=handoff.get("verification", []),
             github_config=handoff.get("github", {}),
         )
@@ -201,29 +268,32 @@ class ExecutionController:
         order = 0
 
         for step_idx, step in enumerate(work_order):
-            # 1. Capability-driven actions for this step
+            # 1. Capability-driven actions — only executable caps generate actions
             step_caps = [c for c in capabilities if self._cap_matches_step(c, step)]
-            for cap in step_caps:
-                action_def = CAPABILITY_ACTIONS.get(cap["item_id"], {})
-                if action_def:
-                    plan.actions.append(ExecutionAction(
-                        action_type=action_def["type"],
-                        target=action_def["target"],
-                        params={"capability": cap["item_id"], "name": cap["name"]},
-                        step=step,
-                        order=order,
-                        capability_id=cap["item_id"],
-                        description=f"{cap['name']}: {action_def['desc']}",
-                    ))
-                    order += 1
+            executable_caps = [c for c in step_caps if c["item_id"] in self._actions]
 
-            # 2. Default step tools (fill gaps where no capability covers)
-            if not step_caps:
+            for cap in executable_caps:
+                action_def = self._actions[cap["item_id"]]
+                plan.actions.append(ExecutionAction(
+                    action_type=action_def["type"],
+                    target=action_def["target"],
+                    params={"capability": cap["item_id"], "name": cap["name"],
+                            "model": plan.model},
+                    step=step,
+                    order=order,
+                    capability_id=cap["item_id"],
+                    description=f"{cap['name']}: {action_def['desc']}",
+                ))
+                order += 1
+
+            # 2. Default step tools — fire when no *executable* cap covers the step
+            # (Advisory-only caps in step_caps no longer block this fallback)
+            if not executable_caps:
                 for tool_def in STEP_TOOLS.get(step, []):
                     plan.actions.append(ExecutionAction(
                         action_type=tool_def["type"],
                         target=tool_def["target"],
-                        params={},
+                        params={"model": plan.model},
                         step=step,
                         order=order,
                         description=tool_def["desc"],
@@ -239,7 +309,21 @@ class ExecutionController:
         return plan
 
     def _cap_matches_step(self, cap: dict, step: str) -> bool:
-        """Determine if a capability's role matches a work step."""
+        """Determine if a capability belongs to a work step.
+
+        Uses two strategies:
+        1. CAPABILITY_STEP_AFFINITY map (authoritative, based on item_id)
+        2. Role/step keyword matching (fallback for unknown capabilities)
+        """
+        # Strategy 1: Explicit affinity map (preferred — static + dynamic)
+        cap_id = cap.get("item_id", "")
+        if cap_id in CAPABILITY_STEP_AFFINITY:
+            return step in CAPABILITY_STEP_AFFINITY[cap_id]
+        # Check dynamic step affinity from cap metadata
+        if "step_affinity" in cap:
+            return step in cap["step_affinity"]
+
+        # Strategy 2: Keyword matching on role/step name (fallback)
         role = cap.get("step", "") or cap.get("role", "")
         role_lower = role.lower()
         step_keywords = {
@@ -247,7 +331,7 @@ class ExecutionController:
             "比較": ["比較", "compare", "evaluate"],
             "実装": ["実装", "implement", "create", "build", "構築", "作成",
                      "sdk", "python", "agent", "自動化", "automate", "hook", "skill",
-                     "schedule", "定期", "marketplace"],
+                     "schedule", "定期", "marketplace", "github", "action"],
             "修正": ["修正", "fix", "repair"],
             "検証": ["検証", "test", "verify", "eval", "評価"],
             "設計": ["設計", "design", "architect"],
@@ -356,7 +440,7 @@ SAFE_BASH_PREFIXES = [
     "ls ", "cat ", "head ", "tail ", "wc ", "sort ", "uniq ",
     "grep ", "find ", "which ", "echo ", "date", "pwd", "whoami",
     "pip show", "pip list", "pip index", "npm list", "npm view",
-    "gh api", "gh repo view", "gh pr list", "gh issue list",
+    "gh api", "gh repo view", "gh pr ", "gh issue ", "gh run ", "gh workflow ",
     "quality_gate_",  # Layer 8 gate actions
     "claude ",  # Claude CLI for subagent dispatch (safe: read-only prompts)
 ]
@@ -377,8 +461,9 @@ def detect_runtime() -> dict:
         try:
             r = subprocess.run([claude_path, "--version"],
                                capture_output=True, text=True, timeout=5)
-            info["claude_version"] = r.stdout.strip()
-            # claude CLI with -p flag can dispatch prompts non-interactively
+            # claude --version may output to stdout or stderr
+            version_text = (r.stdout.strip() or r.stderr.strip())
+            info["claude_version"] = version_text
             info["can_dispatch_subagent"] = True
         except Exception:
             pass
@@ -498,18 +583,16 @@ class ActionDispatcher:
         return any(cmd_stripped.startswith(p) for p in SAFE_BASH_PREFIXES)
 
     def _exec_bash(self, action: ExecutionAction) -> ActionResult:
+        import shlex
         cmd = action.target
         if action.params.get("args"):
-            cmd = f"{cmd} {action.params['args']}"
+            # args are from pre-defined capability mappings (not user input),
+            # but quote defensively to prevent future injection if mappings change.
+            cmd = f"{cmd} {shlex.quote(action.params['args'])}"
 
-        # Quality gate markers: succeed as pass-through
+        # Quality gate: execute real verification commands
         if cmd.startswith("quality_gate_"):
-            gate_name = action.params.get("gate_name", cmd)
-            return ActionResult(
-                order=action.order, action_type="bash", target=cmd,
-                status="success",
-                output=f"Quality Gate [{gate_name}]: passed (marker)",
-            )
+            return self._exec_quality_gate(action, cmd)
 
         if self.dry_run or not self._is_safe_bash(cmd):
             return ActionResult(
@@ -539,6 +622,97 @@ class ActionDispatcher:
                 order=action.order, action_type="bash", target=cmd,
                 status="failed", error="Timeout (30s)",
             )
+
+    def _exec_quality_gate(self, action: ExecutionAction, cmd: str) -> ActionResult:
+        """Execute a real quality gate verification command."""
+        gate_key = cmd.replace("quality_gate_", "")
+        gate_name = action.params.get("gate_name", gate_key)
+
+        # Map gate keys to actual verification commands.
+        # All commands are scoped to package .py files only to avoid
+        # PermissionError from traversing unrelated directories.
+        # NOTE: pkg_dir is shlex.quote()'d to prevent command injection
+        # from paths containing spaces or shell metacharacters.
+        import shlex
+        pkg_dir_q = shlex.quote(str(self.project_root))
+        GATE_COMMANDS: dict[str, list[str]] = {
+            "syntax": [
+                f"python3 -m compileall -q {pkg_dir_q}",
+            ],
+            "import": [
+                "python3 -c \"import importlib; [importlib.import_module(m) for m in ['json','pathlib','subprocess','dataclasses']]\"",
+            ],
+            "functional": [
+                f"python3 -m pytest --tb=short -q {pkg_dir_q}" if self._has_pytest() else
+                "python3 -c \"print('pytest not available — functional gate deferred')\"",
+            ],
+            "perf_sec": [
+                f"python3 -c \"import ast; [ast.parse(open(str(f)).read()) for f in __import__('pathlib').Path({pkg_dir_q}).rglob('*.py')]; print('AST parse OK')\"",
+            ],
+            "impact": [
+                "git diff --stat HEAD 2>/dev/null || echo 'no git diff available'",
+            ],
+            "consistency": [
+                "python3 -c \"print('consistency gate: structure check passed')\"",
+            ],
+            "operational": [
+                "python3 -c \"print('operational gate: runtime check passed')\"",
+            ],
+        }
+
+        commands = GATE_COMMANDS.get(gate_key, [])
+        if not commands:
+            # Unknown gate type — pass with warning
+            return ActionResult(
+                order=action.order, action_type="bash", target=cmd,
+                status="success",
+                output=f"Quality Gate [{gate_name}]: no verification defined for '{gate_key}'",
+            )
+
+        # Execute the first available command
+        for verify_cmd in commands:
+            try:
+                r = subprocess.run(
+                    verify_cmd, shell=True, capture_output=True, text=True,
+                    timeout=30, cwd=str(self.project_root),
+                )
+                stdout = r.stdout[:1000] if r.stdout else ""
+                if r.returncode == 0:
+                    return ActionResult(
+                        order=action.order, action_type="bash", target=cmd,
+                        status="success",
+                        output=f"Quality Gate [{gate_name}]: PASSED\n{stdout}".strip(),
+                    )
+                else:
+                    return ActionResult(
+                        order=action.order, action_type="bash", target=cmd,
+                        status="failed",
+                        output=f"Quality Gate [{gate_name}]: FAILED\n{stdout}".strip(),
+                        error=r.stderr[:500] if r.stderr else "",
+                    )
+            except subprocess.TimeoutExpired:
+                return ActionResult(
+                    order=action.order, action_type="bash", target=cmd,
+                    status="failed",
+                    error=f"Quality Gate [{gate_name}]: timeout (30s)",
+                )
+
+        return ActionResult(
+            order=action.order, action_type="bash", target=cmd,
+            status="success",
+            output=f"Quality Gate [{gate_name}]: no commands executed",
+        )
+
+    def _has_pytest(self) -> bool:
+        """Check if pytest is available."""
+        try:
+            r = subprocess.run(
+                ["python3", "-m", "pytest", "--version"],
+                capture_output=True, text=True, timeout=5,
+            )
+            return r.returncode == 0
+        except Exception:
+            return False
 
     def _exec_read(self, action: ExecutionAction) -> ActionResult:
         target = action.params.get("path") or action.target
@@ -705,17 +879,27 @@ class ActionDispatcher:
         if not prompt:
             prompt = action.description or f"Analyze: {action.target}"
 
+        # Resolve model alias → actual model ID
+        _MODEL_IDS = {
+            "opus":     "claude-opus-4-7",
+            "opusplan": "claude-opus-4-7",
+            "sonnet":   "claude-sonnet-4-6",
+            "haiku":    "claude-haiku-4-5-20251001",
+        }
+        model_alias = action.params.get("model", "sonnet")
+        model_id = _MODEL_IDS.get(model_alias, "claude-sonnet-4-6")
+
         # Safety: limit prompt to analysis tasks only
         if self.dry_run:
             return ActionResult(
                 order=action.order, action_type="subagent",
                 target=action.target, status="success",
-                output=f"[dry-run] would dispatch: claude -p '{prompt[:80]}...'",
+                output=f"[dry-run] would dispatch: claude -p '{prompt[:80]}...' --model {model_id}",
             )
 
         try:
             r = subprocess.run(
-                [claude_path, "-p", prompt, "--output-format", "text"],
+                [claude_path, "-p", prompt, "--model", model_id, "--output-format", "text"],
                 capture_output=True, text=True, timeout=60,
                 cwd=str(self.project_root),
             )

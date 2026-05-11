@@ -16,10 +16,40 @@ handoff: Improvement signals → Phase 5 absorb_update + Phase 6 recheck
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from dataclasses import dataclass, field, asdict
 from typing import Literal, Optional
 from datetime import datetime
 from pathlib import Path
+
+
+def _atomic_save(path: Path, data: dict) -> None:
+    """Write JSON atomically: tmp file → os.replace (POSIX atomic)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _safe_load(path: Path) -> dict | None:
+    """Load JSON defensively: returns None on missing/corrupt file."""
+    if not path.exists():
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 Outcome = Literal["success", "partial", "failure", "skipped"]
@@ -102,6 +132,7 @@ class EvaluationReport:
     capability_accuracy: AccuracyMetrics = field(default_factory=AccuracyMetrics)
     proposals: list[ImprovementProposal] = field(default_factory=list)
     classification_stats: dict = field(default_factory=dict)
+    per_rc_stats: dict = field(default_factory=dict)  # {RC-X: {total, success_score, ...}}
 
     def to_dict(self) -> dict:
         return {
@@ -112,6 +143,7 @@ class EvaluationReport:
             "capability_accuracy": self.capability_accuracy.to_dict(),
             "proposals": [p.to_dict() for p in self.proposals],
             "classification_stats": self.classification_stats,
+            "per_rc_stats": self.per_rc_stats,
         }
 
 
@@ -122,17 +154,13 @@ class EvaluationState:
     last_report: dict = field(default_factory=dict)
 
     def save(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump({"records": self.records, "last_report": self.last_report},
-                      f, indent=2, ensure_ascii=False)
+        _atomic_save(path, {"records": self.records, "last_report": self.last_report})
 
     @classmethod
     def load(cls, path: Path) -> "EvaluationState":
-        if not path.exists():
+        data = _safe_load(path)
+        if data is None:
             return cls()
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
         return cls(
             records=data.get("records", []),
             last_report=data.get("last_report", {}),
@@ -180,9 +208,14 @@ class EvaluationEngine:
             total_executions=len(records),
         )
 
-        # Success rate
-        successes = sum(1 for r in records if r.outcome == "success")
-        report.success_rate = successes / len(records) if records else 0.0
+        # Success rate (weighted: success=1.0, partial=0.5, others=0.0)
+        score = sum(
+            1.0 if r.outcome == "success"
+            else 0.5 if r.outcome == "partial"
+            else 0.0
+            for r in records
+        )
+        report.success_rate = score / len(records) if records else 0.0
 
         # Model selection accuracy
         report.model_accuracy = self._assess_model_accuracy(records)
@@ -195,6 +228,9 @@ class EvaluationEngine:
         for r in records:
             rc_counts[r.classification] = rc_counts.get(r.classification, 0) + 1
         report.classification_stats = rc_counts
+
+        # Per-RC success score breakdown — drives the RC-floor learning loop
+        report.per_rc_stats = self._per_classification_stats(records)
 
         # Generate improvement proposals
         report.proposals = self._generate_proposals(records, report)
@@ -210,18 +246,22 @@ class EvaluationEngine:
         return self.state.last_report
 
     def _assess_model_accuracy(self, records: list[ExecutionRecord]) -> AccuracyMetrics:
-        """Assess how well model selection matched actual needs."""
+        """Assess model selection — *only* when execution wasn't blocked by env issues.
+        Connection problems and quality-gate blocks are NOT model selection bugs."""
         metrics = AccuracyMetrics()
 
         for r in records:
             if not r.model_recommended:
+                continue
+            # Skip env-caused failures: not the model selector's fault
+            if r.connection_issues or not r.quality_gate_passed:
                 continue
             metrics.total_decisions += 1
             rec_tier = MODEL_TIERS.get(r.model_recommended, 1)
             used_tier = MODEL_TIERS.get(r.model_used, 1)
 
             if r.model_used == r.model_recommended:
-                if r.outcome == "success":
+                if r.outcome in ("success", "partial"):
                     metrics.correct_decisions += 1
                 elif r.outcome == "failure":
                     metrics.underqualified += 1
@@ -233,6 +273,28 @@ class EvaluationEngine:
                     metrics.underqualified += 1
 
         return metrics
+
+    def _per_classification_stats(self, records: list[ExecutionRecord]) -> dict:
+        """Per-RC outcome breakdown — drives floor escalation/recovery decisions."""
+        stats: dict[str, dict] = {}
+        for r in records:
+            if not r.classification:
+                continue
+            s = stats.setdefault(r.classification, {
+                "total": 0, "success": 0, "partial": 0, "failure": 0,
+            })
+            s["total"] += 1
+            if r.outcome == "success":
+                s["success"] += 1
+            elif r.outcome == "partial":
+                s["partial"] += 1
+            else:
+                s["failure"] += 1
+        for rc, s in stats.items():
+            s["success_score"] = round(
+                (s["success"] + 0.5 * s["partial"]) / s["total"], 3
+            )
+        return stats
 
     def _assess_capability_accuracy(self, records: list[ExecutionRecord]) -> AccuracyMetrics:
         """Assess how well capability selection matched actual usage."""
@@ -312,6 +374,29 @@ class EvaluationEngine:
                 evidence={"top_issues": dict(top_issues)},
             ))
 
+        # Proposal 6: Per-RC model floor adjustment (THE closed-loop learning signal)
+        for rc, s in report.per_rc_stats.items():
+            if s["total"] < 3:
+                continue
+            if s["success_score"] < 0.5:
+                proposals.append(ImprovementProposal(
+                    target="per_rc_model_floor",
+                    action=f"Raise floor for {rc}",
+                    reason=f"{rc} success_score={s['success_score']:.0%} (n={s['total']})",
+                    priority="high",
+                    evidence={"rc": rc, "success_score": s["success_score"],
+                              "total": s["total"], "direction": "raise"},
+                ))
+            elif s["success_score"] >= 0.8:
+                proposals.append(ImprovementProposal(
+                    target="per_rc_model_floor",
+                    action=f"Lower floor for {rc}",
+                    reason=f"{rc} recovered to {s['success_score']:.0%}",
+                    priority="low",
+                    evidence={"rc": rc, "success_score": s["success_score"],
+                              "total": s["total"], "direction": "lower"},
+                ))
+
         return proposals
 
     def _dict_to_record(self, d: dict) -> ExecutionRecord:
@@ -344,17 +429,19 @@ class ImprovementConfig:
     rollback_snapshots: list[dict] = field(default_factory=list)
     version: int = 0
 
+    MAX_PROPOSALS = 20
+    MAX_SNAPSHOTS = 5
+
     def save(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(asdict(self), f, indent=2, ensure_ascii=False)
+        self.applied_proposals = self.applied_proposals[-self.MAX_PROPOSALS:]
+        self.rollback_snapshots = self.rollback_snapshots[-self.MAX_SNAPSHOTS:]
+        _atomic_save(path, asdict(self))
 
     @classmethod
     def load(cls, path: Path) -> "ImprovementConfig":
-        if not path.exists():
+        data = _safe_load(path)
+        if data is None:
             return cls()
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
         return cls(
             model_weight_overrides=data.get("model_weight_overrides", {}),
             capability_priority_overrides=data.get("capability_priority_overrides", {}),
@@ -379,6 +466,7 @@ APPLY_THRESHOLDS = {
     "capability_selection": {"min_decisions": 5, "min_mismatches": 3},
     "execution_flow": {"min_executions": 5, "min_failure_rate": 0.25},
     "connection_bootstrap": {"min_issues": 3},
+    "per_rc_model_floor": {"min_decisions": 3},
 }
 
 
@@ -402,22 +490,62 @@ class ImprovementLoop:
         self.config = ImprovementConfig.load(config_path)
         self.evaluator = evaluator
 
+    DUPLICATE_LOOKBACK = 5      # last N applied proposals to dedupe against
+    ABANDON_AFTER_N_NOOP = 3    # if same proposal applied N times with no metric gain → abandon
+
     def run_cycle(self) -> list[dict]:
-        """Full improvement cycle: analyze → filter → apply → verify."""
+        """Full improvement cycle: analyze → filter → dedup → apply → verify.
+
+        Three safeguards against infinite re-application:
+          1. Skip proposals applied in last DUPLICATE_LOOKBACK cycles
+          2. Abandon proposals that fired ABANDON_AFTER_N_NOOP times w/o gain
+          3. Track success_rate trajectory — abandon if no upward movement
+        """
         report = self.evaluator.analyze()
         applied = []
 
+        recent_hashes = {
+            self._proposal_hash(p.get("target", ""), p.get("action", ""))
+            for p in self.config.applied_proposals[-self.DUPLICATE_LOOKBACK:]
+        }
+        abandoned = set(self.config.capability_priority_overrides.get("abandoned_proposals", []))
+
         for proposal in report.proposals:
-            if self._meets_threshold(proposal):
-                success = self._apply_proposal(proposal)
-                if success:
-                    applied.append({
-                        "proposal": proposal.to_dict(),
-                        "applied_at": datetime.now().isoformat(),
-                        "config_version": self.config.version,
-                    })
+            phash = self._proposal_hash(proposal.target, proposal.action)
+            if phash in recent_hashes:
+                continue
+            if phash in abandoned:
+                continue
+            if not self._meets_threshold(proposal):
+                continue
+
+            # Abandonment check: how many times applied historically without improvement?
+            past_count = sum(
+                1 for p in self.config.applied_proposals
+                if self._proposal_hash(p.get("target", ""), p.get("action", "")) == phash
+            )
+            if past_count >= self.ABANDON_AFTER_N_NOOP:
+                abandoned.add(phash)
+                continue
+
+            if self._apply_proposal(proposal):
+                applied.append({
+                    "proposal": proposal.to_dict(),
+                    "applied_at": datetime.now().isoformat(),
+                    "config_version": self.config.version,
+                })
+
+        # Persist abandoned set
+        if abandoned:
+            self.config.capability_priority_overrides["abandoned_proposals"] = sorted(abandoned)
+            self.config.save(self.config_path)
 
         return applied
+
+    @staticmethod
+    def _proposal_hash(target: str, action: str) -> str:
+        import hashlib
+        return hashlib.md5(f"{target}::{action}".encode()).hexdigest()[:10]
 
     def _meets_threshold(self, proposal: ImprovementProposal) -> bool:
         """Check if a proposal has enough evidence to be auto-applied."""
@@ -446,6 +574,9 @@ class ImprovementLoop:
             issues = evidence.get("top_issues", {})
             return sum(issues.values()) >= thresholds.get("min_issues", 3)
 
+        if proposal.target == "per_rc_model_floor":
+            return evidence.get("total", 0) >= thresholds.get("min_decisions", 3)
+
         return False
 
     def _apply_proposal(self, proposal: ImprovementProposal) -> bool:
@@ -466,6 +597,9 @@ class ImprovementLoop:
                 self._record_execution_issue(proposal)
             elif proposal.target == "connection_bootstrap":
                 self._record_connection_issue(proposal)
+            elif proposal.target == "per_rc_model_floor":
+                if not self._adjust_rc_floor(proposal):
+                    return False  # no-op (no actual state change)
             else:
                 return False
 
@@ -519,6 +653,33 @@ class ImprovementLoop:
     def _record_connection_issue(self, proposal: ImprovementProposal):
         """Record recurring connection issues."""
         self.config.capability_priority_overrides["connection_issues"] = proposal.evidence.get("top_issues", {})
+
+    _ESCALATION = {"haiku": "sonnet", "sonnet": "opus", "opusplan": "opus", "opus": "opus"}
+
+    def _adjust_rc_floor(self, proposal: ImprovementProposal) -> bool:
+        """Set or clear a per-RC model floor based on the proposal direction.
+        Returns True if a change occurred (worth bumping version), False if no-op."""
+        rc = proposal.evidence.get("rc", "")
+        direction = proposal.evidence.get("direction", "raise")
+        if not rc:
+            return False
+
+        floor_map = self.config.model_weight_overrides.setdefault("rc_model_floor", {})
+
+        if direction == "lower":
+            # Recovery: clear floor if present
+            if rc in floor_map:
+                del floor_map[rc]
+                return True
+            return False
+
+        # Raise: escalate one tier (sonnet → opus, opus stays opus)
+        current = floor_map.get(rc, "sonnet")
+        new_floor = self._ESCALATION.get(current, "sonnet")
+        if new_floor == current:
+            return False  # already at ceiling
+        floor_map[rc] = new_floor
+        return True
 
     def rollback(self) -> bool:
         """Rollback to the last known-good configuration."""
