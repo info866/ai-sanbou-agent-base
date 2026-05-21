@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "brain-memory": {
+      "command": "/Users/color/.pyenv/versions/3.13.6/bin/python3",
+      "args": ["/Users/color/workspace/brain/mcp/server.py"],
+      "env": {"BRAIN_ENV": "dev"}
+    }
+  }
+}
