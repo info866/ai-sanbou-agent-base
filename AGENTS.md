@@ -9,22 +9,21 @@ Non-trivial = new feature, refactor across 2+ files, bug fix, anything in
 
 Exempt = README typo, 1-line fix the user pinpointed, format-only changes.
 
-For non-trivial work, **make ONE call** to the Brain Router:
+For non-trivial work, **make ONE call** through the canonical Brain MCP:
 
 ```
-GET https://brain.color2021.com/issue-rag/briefing/info866/ai-sanbou-agent-base
-  Header: X-API-Key: $BRAIN_API_KEY
-
-# or via MCP:
 issue_rag_briefing(owner="info866", repo="ai-sanbou-agent-base")
 ```
+
+Do not use the legacy HTTP/OpenAPI Custom GPT route. All agents use the same
+`~/workspace/brain/mcp/server.py` implementation.
 
 Returned bundle: `project_context` + `recent_lessons` + `active_failures`
 + `acceptance_summary`. Read once, factor into your plan, then start work.
 
 If `active_failures` is non-empty, address those constraints first.
 Before finalizing any completion report, also call
-`POST /issue-rag/audit-report` with the draft.
+`issue_rag_audit_report(repo="info866/ai-sanbou-agent-base", report_text=...)` with the draft.
 
 ## 4-piece protocol (mandatory for any bug discovered + fixed)
 
